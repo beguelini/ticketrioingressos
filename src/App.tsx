@@ -94,7 +94,7 @@ function App() {
 
       <main id="inicio">
         <section className="hero" aria-label="Carnaval do Rio de Janeiro">
-          <img className="hero__image" src="/images/sambadrome-hero.jpg" alt="A avenida iluminada durante um desfile de Carnaval na Marquês de Sapucaí" fetchPriority="high" />
+          <img className="hero__image" src="/images/sambadrome-hero.jpg" alt="A avenida iluminada durante um desfile de Carnaval na Marquês de Sapucaí" />
           <div className="hero__shade" />
           <div className="hero__content">
             <h1>O Rio é o palco.<br/><span>A avenida é sua.</span></h1>
