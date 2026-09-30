@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { carnivalProducts, categories, cityProducts, money } from './catalog'
 import type { Category, Option, Product } from './catalog'
+import { loadCatalog } from './catalogApi'
 
 type CartItem = { product: Product; option: Option; quantity: number }
 type ChatMessage = { id: number; from: 'visitor' | 'bot'; text: string }
@@ -53,16 +54,31 @@ function App() {
   const [chatInput, setChatInput] = useState('')
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{ id: 1, from: 'bot', text: 'Olá! Sou o atendimento simulado da Ticket Rio. Posso ajudar você a explorar os ingressos e experiências desta demonstração.' }])
   const chatMessagesRef = useRef<HTMLDivElement>(null)
+  const [catalogProducts, setCatalogProducts] = useState<Product[]>(() => [...carnivalProducts, ...cityProducts])
+  const [catalogFallback, setCatalogFallback] = useState(false)
+  const [catalogRefresh, setCatalogRefresh] = useState(0)
+
+  useEffect(() => {
+    let active = true
+    loadCatalog().then((products) => {
+      if (!active) return
+      setCatalogProducts(products)
+      setCatalogFallback(false)
+    }).catch(() => {
+      if (active) setCatalogFallback(true)
+    })
+    return () => { active = false }
+  }, [catalogRefresh])
 
   useEffect(() => {
     if (chatMessagesRef.current) chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight
   }, [chatMessages, chatOpen])
 
-  const filteredProducts = useMemo(() => carnivalProducts.filter((product) => (
+  const filteredProducts = useMemo(() => catalogProducts.filter((product) => product.kind === 'carnaval' && (
     (category === 'Todos' || product.category === category) &&
     (date === 'Todas as datas' || product.date === date) &&
     (sectorFilter === 'Todos os setores' || product.options.some((option) => option.name.includes(sectorFilter)))
-  )), [category, date, sectorFilter])
+  )), [catalogProducts, category, date, sectorFilter])
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
   const cartTotal = cart.reduce((sum, item) => sum + item.option.price * item.quantity, 0)
   const activeOption = selectedProduct?.options.find((option) => option.name === selectedOption) ?? selectedProduct?.options[0]
@@ -115,12 +131,13 @@ function App() {
         <button className="button button--primary search-button" onClick={scrollToProducts}>Buscar <Icon name="arrow" size={18}/></button>
         <p className="demo-disclaimer">Demonstração: produtos, preços, promoções e datas são ilustrativos. Nenhuma cobrança ou reserva será feita.</p>
       </section>
+      {catalogFallback && <div className="catalog-alert" role="status"><span>Não foi possível atualizar o catálogo. Exibindo uma cópia demonstrativa.</span><button onClick={() => setCatalogRefresh((value) => value + 1)}>Tentar novamente</button></div>}
 
       <section className="section categories-section" id="categorias"><div className="section-heading"><div><span className="section-kicker">ESCOLHA SUA EXPERIÊNCIA</span><h2>O Carnaval do seu jeito.</h2></div><button className="link-action" onClick={() => chooseCategory('Todos')}>Ver tudo <Icon name="arrow" size={17}/></button></div><div className="category-grid">{categories.map((item) => <button className="category-card" key={item.name} onClick={() => chooseCategory(item.name)}><img src={item.image} alt="" loading="lazy"/><span className="category-card__shade"/><span className="category-card__copy"><small>{item.description}</small><strong>{item.name}</strong></span><span className="category-card__arrow"><Icon name="arrow" size={19}/></span></button>)}</div></section>
 
       <section className="section featured-section" id="destaques"><div className="section-heading"><div><span className="section-kicker">INGRESSOS EM DESTAQUE</span><h2>Encontre seu lugar na avenida.</h2></div><span className="date-note"><Icon name="calendar" size={17}/> 5 a 8 de fevereiro de 2027</span></div><div className="product-grid">{filteredProducts.length ? filteredProducts.map((product) => <ProductCard product={product} onChoose={chooseProduct} key={product.id}/>) : <div className="empty-results"><strong>Nenhum ingresso encontrado</strong><span>Ajuste os filtros para ver outras opções.</span><button className="link-action" onClick={() => { setCategory('Todos'); setDate('Todas as datas'); setSectorFilter('Todos os setores') }}>Limpar filtros</button></div>}</div><p className="mock-note">* Catálogo demonstrativo. Imagens ilustrativas e produtos não disponíveis para compra.</p></section>
 
-      <section className="city-section" id="rio-city-tour"><div className="section city-section__inner"><div className="city-section__intro"><span className="section-kicker">RIO CITY TOUR · EXPERIÊNCIAS NO RIO</span><h2>Você também pode gostar.</h2><p>Da mesma empresa da Ticket Rio, a Rio City Tour reúne experiências para descobrir a cidade além do Carnaval.</p></div><div className="product-grid city-grid">{cityProducts.map((product) => <ProductCard product={product} onChoose={chooseProduct} key={product.id}/>)}</div><p className="mock-note">* Experiências, datas e preços ilustrativos nesta demonstração.</p></div></section>
+      <section className="city-section" id="rio-city-tour"><div className="section city-section__inner"><div className="city-section__intro"><span className="section-kicker">RIO CITY TOUR · EXPERIÊNCIAS NO RIO</span><h2>Você também pode gostar.</h2><p>Da mesma empresa da Ticket Rio, a Rio City Tour reúne experiências para descobrir a cidade além do Carnaval.</p></div><div className="product-grid city-grid">{catalogProducts.filter((product) => product.kind === 'city').map((product) => <ProductCard product={product} onChoose={chooseProduct} key={product.id}/>)}</div><p className="mock-note">* Experiências, datas e preços ilustrativos nesta demonstração.</p></div></section>
 
       <section className="trust-strip" id="guia" aria-label="Sobre esta demonstração"><div className="trust-item"><Icon name="shield" size={26}/><div><strong>Escolha com clareza</strong><span>Opções e valores exibidos antes do carrinho.</span></div></div><div className="trust-item"><Icon name="phone" size={26}/><div><strong>Feito para o celular</strong><span>Explore o Rio onde você estiver.</span></div></div><div className="trust-item"><Icon name="headset" size={26}/><div><strong>Ajuda para explorar</strong><span>Converse com nosso chat simulado.</span></div></div></section>
     </main>
