@@ -60,7 +60,7 @@ Use o e-mail real do administrador no SQL Editor. Não coloque o UUID, a chave `
 
 ## Conteúdo e importação
 
-Os módulos do painel permitem editar rascunhos de categorias, produtos, variantes, eventos, datas, escolas, desfiles, páginas, FAQ, banners, blocos da home e rotas de transfer. Alguns módulos financeiros/operacionais são somente leitura até existir um fluxo de pagamento e entrega conectado.
+Os módulos do painel permitem editar rascunhos de categorias, produtos, variantes, eventos, datas, escolas, desfiles, páginas, FAQ, banners, blocos da home e rotas de transfer. Administradores e operação podem registrar manualmente o status de entrega oficial, fornecedor, referência e instruções em pedidos existentes; o cliente vê esses dados na página do pedido. As alterações ficam no log de auditoria. Os módulos financeiros e as demais listas operacionais são somente leitura até existir um fluxo de pagamento conectado.
 
 Importação CSV de produtos: `sku,slug,name_pt,kind,summary_pt`. Importação CSV de variantes: `sku,product_id,name_pt,price_cents,currency`. O painel mostra prévia, valida colunas, SKU duplicado e exige confirmação. Não sobrescreve registros existentes. Produtos entram como rascunhos sob consulta; variantes entram com estoque zero e indisponíveis. Imagens podem ser enviadas ao Storage pelo editor de produtos.
 

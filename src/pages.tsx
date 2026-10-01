@@ -254,10 +254,30 @@ export function OrderPage() {
   const { id } = useParams()
   const { user } = useStore()
   const [order, setOrder] = useState<{ order_number: number; status: string; payment_status: string; delivery_status: string; total_cents: number; order_items: { id: string; product_name: string; variant_name: string; quantity: number; unit_price_cents: number }[] } | null>(null)
+  const [deliveries, setDeliveries] = useState<{ order_item_id: string; status: string; supplier: string | null; recipient_email: string | null; available_at: string | null; instructions: string | null }[]>([])
   const [loading, setLoading] = useState(true)
-  useEffect(() => { if (user && supabase) void supabase.from('orders').select('order_number,status,payment_status,delivery_status,total_cents,order_items(id,product_name,variant_name,quantity,unit_price_cents)').eq('id', id).eq('customer_id', user.id).maybeSingle().then(({ data }) => { setOrder(data as typeof order); setLoading(false) }); else setLoading(false) }, [id, user])
+  useEffect(() => {
+    if (!user || !supabase) { setLoading(false); return }
+    let active = true
+    const load = async () => {
+      const client = supabase
+      if (!client) return
+      const { data } = await client.from('orders').select('order_number,status,payment_status,delivery_status,total_cents,order_items(id,product_name,variant_name,quantity,unit_price_cents)').eq('id', id).eq('customer_id', user.id).maybeSingle()
+      if (!active) return
+      const current = data as typeof order
+      setOrder(current)
+      if (current?.order_items.length) {
+        const result = await client.from('deliveries').select('order_item_id,status,supplier,recipient_email,available_at,instructions').in('order_item_id', current.order_items.map((item) => item.id))
+        if (active) setDeliveries(result.data ?? [])
+      } else setDeliveries([])
+      if (active) setLoading(false)
+    }
+    void load()
+    return () => { active = false }
+  }, [id, user])
   if (!user) return <div className="page-container narrow-page"><Empty title="Acesso necessário" detail="Entre para consultar seus pedidos." action={<Link to="/login">Entrar</Link>} /></div>
   if (loading) return <div className="page-container narrow-page"><p role="status">Carregando pedido…</p></div>
   if (!order) return <div className="page-container narrow-page"><Empty title="Pedido não encontrado" detail="Este pedido não existe ou não pertence à sua conta." /></div>
-  return <div className="page-container narrow-page"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>Pedido #{order.order_number}</h1></div><div className="checkout-card"><p>Pedido: {order.status}</p><p>Pagamento: {order.payment_status}</p><p>Entrega: {order.delivery_status}</p>{order.order_items.map((item) => <p key={item.id}>{item.quantity} × {item.product_name} · {item.variant_name}<strong>{money(item.quantity * item.unit_price_cents)}</strong></p>)}<div className="order-total"><span>Total</span><strong>{money(order.total_cents)}</strong></div></div><div className="pending-notice"><strong>Comprovante ≠ ingresso oficial</strong><p>Para ingressos oficiais, acompanhe o status de entrega. O acesso ao evento depende do ingresso disponibilizado pelo fornecedor no aplicativo oficial.</p></div></div>
+  const deliveryLabels: Record<string, string> = { awaiting_supplier: 'Aguardando fornecedor', processing: 'Em processamento', available_official_app: 'Disponibilizado no aplicativo oficial', missing_data: 'Pendência de dados', delivery_issue: 'Problema na entrega', cancelled: 'Cancelado' }
+  return <div className="page-container narrow-page"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>Pedido #{order.order_number}</h1></div><div className="checkout-card"><p>Pedido: {order.status}</p><p>Pagamento: {order.payment_status}</p><p>Entrega: {order.delivery_status}</p>{order.order_items.map((item) => { const delivery = deliveries.find((entry) => entry.order_item_id === item.id); return <div key={item.id}><p>{item.quantity} × {item.product_name} · {item.variant_name}<strong>{money(item.quantity * item.unit_price_cents)}</strong></p>{delivery && <div className="delivery-detail"><strong>Entrega oficial: {deliveryLabels[delivery.status] ?? delivery.status}</strong>{delivery.supplier && <span>Fornecedor: {delivery.supplier}</span>}{delivery.recipient_email && <span>Destinatário: {delivery.recipient_email}</span>}{delivery.available_at && <span>Disponibilizado em: {new Date(delivery.available_at).toLocaleDateString('pt-BR')}</span>}{delivery.instructions && <p>{delivery.instructions}</p>}</div>}</div> })}<div className="order-total"><span>Total</span><strong>{money(order.total_cents)}</strong></div></div><div className="pending-notice"><strong>Comprovante ≠ ingresso oficial</strong><p>Para ingressos oficiais, acompanhe o status de entrega. O acesso ao evento depende do ingresso disponibilizado pelo fornecedor no aplicativo oficial.</p></div></div>
 }
