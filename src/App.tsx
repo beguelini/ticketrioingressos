@@ -12,7 +12,7 @@ function Seo() {
   const { pathname } = useLocation()
   useEffect(() => {
     const names: Record<string, string> = {
-      '/': 'Carnaval e experiências no Rio',
+      '/': 'Carnaval e experiências no Rio', '/buscar': 'Buscar experiências',
       '/ingressos': 'Ingressos', '/transfers': 'Transfers',
       '/city-tours': 'Rio City Tour', '/camarotes': 'Camarotes',
       '/sambodromo': 'Sambódromo', '/ordem-dos-desfiles': 'Ordem dos desfiles',
@@ -104,6 +104,7 @@ const legacyRoutes = [
 function StoreRoutes() {
   return <Shell><Routes>
     <Route path="/" element={<Home />} />
+    <Route path="/buscar" element={<Catalog />} />
     <Route path="/ingressos" element={<Catalog kind="ticket" />} />
     <Route path="/transfers" element={<Catalog kind="transfer" />} />
     <Route path="/city-tours" element={<Catalog kind="tour" />} />

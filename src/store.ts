@@ -63,6 +63,7 @@ export const money = (cents: number, currency = 'BRL', language: Language = 'pt'
 
 export const categories: { kind: ProductKind; pt: string; en: string; image: string }[] = [
   { kind: 'ticket', pt: 'Ingressos', en: 'Tickets', image: '/images/avenida-noturna.webp' },
+  { kind: 'package', pt: 'Camarotes', en: 'VIP lounges', image: '/images/camarote-vista.webp' },
   { kind: 'transfer', pt: 'Transfers', en: 'Transfers', image: '/images/rio-pelo-mar.webp' },
   { kind: 'tour', pt: 'Rio City Tour', en: 'Rio City Tour', image: '/images/pao-de-acucar.webp' },
   { kind: 'metro', pt: 'Metrô', en: 'Metro', image: '/images/santa-teresa-bonde.webp' },
