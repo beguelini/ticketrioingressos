@@ -2,5 +2,19 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    { "source": "/ingressos/carnaval/rio/2027/comprar", "destination": "/ingressos", "permanent": true },
+    { "source": "/products/category/transfer", "destination": "/transfers", "permanent": true },
+    { "source": "/products/category/metro", "destination": "/metro", "permanent": true },
+    { "source": "/products/category/citytour", "destination": "/city-tours", "permanent": true },
+    { "source": "/products/category/camisetas", "destination": "/camisetas", "permanent": true },
+    { "source": "/vipLounges", "destination": "/camarotes", "permanent": true },
+    { "source": "/about", "destination": "/sobre", "permanent": true },
+    { "source": "/contacts", "destination": "/contato", "permanent": true },
+    { "source": "/profile", "destination": "/conta", "permanent": true },
+    { "source": "/viewcart", "destination": "/carrinho", "permanent": true },
+    { "source": "/comprar-receber", "destination": "/como-comprar", "permanent": true },
+    { "source": "/retirada-ingressos", "destination": "/como-comprar", "permanent": true }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
