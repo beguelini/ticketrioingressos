@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase, type CartLine } from './store'
 
 const storageKey = 'ticket-rio-cart-v2'
@@ -16,7 +16,15 @@ function readCart(): CartLine[] {
 
 export function useCart(userId: string | null) {
   const [lines, setLines] = useState<CartLine[]>(readCart)
+  const previousUser = useRef<string | null>(null)
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(lines)) }, [lines])
+  useEffect(() => {
+    if (previousUser.current && previousUser.current !== userId) {
+      localStorage.removeItem(storageKey)
+      setLines([])
+    }
+    previousUser.current = userId
+  }, [userId])
   useEffect(() => {
     if (!userId || !supabase) return
     let cancelled = false
