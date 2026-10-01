@@ -1,3 +1,5 @@
+import { readConsent } from './consent'
+
 type EventName = 'page_view' | 'view_item' | 'add_to_cart' | 'begin_checkout' | 'purchase'
 type EventData = { item_id?: string; currency?: string; value?: number; order_id?: string; path?: string }
 type PixelFn = ((...args: unknown[]) => void) & { queue?: unknown[][]; loaded?: boolean; version?: string }
@@ -8,12 +10,15 @@ declare global {
     _fbq?: PixelFn
   }
 }
-let started = false
+let gtmStarted = false
+let pixelStarted = false
 export function startAnalytics() {
-  if (started || localStorage.getItem('ticket-rio-consent') !== 'accepted') return
-  started = true
+  const consent = readConsent()
+  if (!consent) return
   const gtm = import.meta.env.VITE_GTM_ID
-  if (gtm && /^GTM-[A-Z0-9]+$/.test(gtm)) {
+  // A GTM container may include advertising tags, so require both choices.
+  if (!gtmStarted && consent.analytics && consent.marketing && gtm && /^GTM-[A-Z0-9]+$/.test(gtm)) {
+    gtmStarted = true
     window.dataLayer = window.dataLayer ?? []
     window.dataLayer.push({ 'gtm.start': Date.now(), event: 'gtm.js' })
     const script = document.createElement('script')
@@ -22,7 +27,8 @@ export function startAnalytics() {
     document.head.append(script)
   }
   const pixel = import.meta.env.VITE_META_PIXEL_ID
-  if (pixel && /^\d+$/.test(pixel)) {
+  if (!pixelStarted && consent.marketing && pixel && /^\d+$/.test(pixel)) {
+    pixelStarted = true
     const stub: PixelFn = (...args: unknown[]) => { (stub.queue ??= []).push(args) }
     stub.loaded = true
     stub.version = '2.0'
@@ -37,12 +43,13 @@ export function startAnalytics() {
   }
 }
 export function track(event: EventName, data: EventData = {}) {
-  if (localStorage.getItem('ticket-rio-consent') !== 'accepted') return
+  const consent = readConsent()
+  if (!consent || (!consent.analytics && !consent.marketing)) return
   if (event === 'purchase') {
     if (!data.order_id || sessionStorage.getItem(`ticket-rio-purchase-${data.order_id}`)) return
     sessionStorage.setItem(`ticket-rio-purchase-${data.order_id}`, '1')
   }
-  window.dataLayer?.push({ event, ...data })
+  if (consent.analytics && consent.marketing) window.dataLayer?.push({ event, ...data })
   const meta = { page_view: 'PageView', view_item: 'ViewContent', add_to_cart: 'AddToCart', begin_checkout: 'InitiateCheckout', purchase: 'Purchase' }[event]
-  window.fbq?.('track', meta, { content_ids: data.item_id ? [data.item_id] : undefined, currency: data.currency, value: data.value })
+  if (consent.marketing) window.fbq?.('track', meta, { content_ids: data.item_id ? [data.item_id] : undefined, currency: data.currency, value: data.value })
 }
