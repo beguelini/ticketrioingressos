@@ -7,6 +7,7 @@ export type Product = {
   slug: string
   kind: ProductKind
   category_id: string | null
+  category?: { slug: string; name_pt: string; name_en: string | null } | null
   event_date_id: string | null
   name_pt: string
   name_en: string | null
@@ -61,20 +62,21 @@ export const supabase = url && key ? createClient(url, key) : null
 export const money = (cents: number, currency = 'BRL', language: Language = 'pt') =>
   new Intl.NumberFormat(language === 'pt' ? 'pt-BR' : 'en-US', { style: 'currency', currency }).format(cents / 100)
 
-export const categories: { kind: ProductKind; pt: string; en: string; image: string }[] = [
-  { kind: 'ticket', pt: 'Ingressos', en: 'Tickets', image: '/images/avenida-noturna.webp' },
-  { kind: 'package', pt: 'Camarotes', en: 'VIP lounges', image: '/images/camarote-vista.webp' },
-  { kind: 'transfer', pt: 'Transfers', en: 'Transfers', image: '/images/rio-pelo-mar.webp' },
-  { kind: 'tour', pt: 'Rio City Tour', en: 'Rio City Tour', image: '/images/pao-de-acucar.webp' },
-  { kind: 'metro', pt: 'Metrô', en: 'Metro', image: '/images/santa-teresa-bonde.webp' },
-  { kind: 'apparel', pt: 'Camisetas e abadás', en: 'T-shirts and costumes', image: '/images/bloco-de-rua.webp' },
+export const categories: { kind: ProductKind; pt: string; en: string; image: string; path: string; categorySlug?: string }[] = [
+  { kind: 'ticket', pt: 'Ingressos', en: 'Tickets', image: '/images/avenida-noturna.webp', path: '/ingressos' },
+  { kind: 'ticket', pt: 'Ensaio Técnico', en: 'Technical Rehearsal', image: '/images/ensaio-tecnico.jpg', path: '/ensaio-tecnico', categorySlug: 'ensaio-tecnico' },
+  { kind: 'package', pt: 'Camarotes', en: 'VIP lounges', image: '/images/camarote-vista.webp', path: '/camarotes' },
+  { kind: 'transfer', pt: 'Transfers', en: 'Transfers', image: '/images/rio-pelo-mar.webp', path: '/transfers' },
+  { kind: 'tour', pt: 'Rio City Tour', en: 'Rio City Tour', image: '/images/pao-de-acucar.webp', path: '/city-tours' },
+  { kind: 'metro', pt: 'Metrô', en: 'Metro', image: '/images/santa-teresa-bonde.webp', path: '/metro' },
+  { kind: 'apparel', pt: 'Camisetas e abadás', en: 'T-shirts and costumes', image: '/images/bloco-de-rua.webp', path: '/camisetas' },
 ]
 
 export async function fetchCatalog(): Promise<CatalogProduct[]> {
   if (!supabase) throw new Error('Supabase não configurado')
   const { data, error } = await supabase
     .from('store_products')
-    .select('*,product_variants(*),event_dates(event_date,parade_group)')
+    .select('*,product_variants(*),event_dates(event_date,parade_group),category:store_categories(slug,name_pt,name_en)')
     .eq('status', 'published')
     .order('sort_order')
   if (error) throw error
@@ -85,7 +87,7 @@ export async function fetchProduct(slug: string): Promise<CatalogProduct | null>
   if (!supabase) throw new Error('Supabase não configurado')
   const { data, error } = await supabase
     .from('store_products')
-    .select('*,product_variants(*),event_dates(event_date,parade_group)')
+    .select('*,product_variants(*),event_dates(event_date,parade_group),category:store_categories(slug,name_pt,name_en)')
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle()

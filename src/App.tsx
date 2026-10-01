@@ -14,7 +14,7 @@ function Seo() {
   useEffect(() => {
     const names: Record<string, string> = {
       '/': 'Carnaval e experiências no Rio', '/buscar': 'Buscar experiências',
-      '/ingressos': 'Ingressos', '/transfers': 'Transfers',
+      '/ingressos': 'Ingressos', '/ensaio-tecnico': 'Ensaio Técnico', '/transfers': 'Transfers',
       '/city-tours': 'Rio City Tour', '/camarotes': 'Camarotes',
       '/sambodromo': 'Sambódromo', '/ordem-dos-desfiles': 'Ordem dos desfiles',
     }
@@ -73,7 +73,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <footer className="site-footer">
       <div className="footer-main">
         <div><Link className="footer-brand" to="/"><img src="/ticket-rio-carnaval.png" alt="Ticket Rio" /></Link><p>O Rio para sentir, viver e lembrar.</p><small>{institution.name} · CNPJ {institution.cnpj}{!institution.confirmed && ' · Dados sujeitos a confirmação.'}</small></div>
-        <nav className="footer-links" aria-label="Loja"><Link to="/ingressos">Ingressos</Link><Link to="/transfers">Transfers</Link><Link to="/city-tours">Rio City Tour</Link><Link to="/metro">Metrô</Link><Link to="/camisetas">Camisetas</Link><Link to="/camarotes">Camarotes</Link></nav>
+        <nav className="footer-links" aria-label="Loja"><Link to="/ingressos">Ingressos</Link><Link to="/ensaio-tecnico">Ensaio Técnico</Link><Link to="/transfers">Transfers</Link><Link to="/city-tours">Rio City Tour</Link><Link to="/metro">Metrô</Link><Link to="/camisetas">Camisetas</Link><Link to="/camarotes">Camarotes</Link></nav>
         <nav className="footer-links" aria-label="Informações"><Link to="/sobre">Sobre</Link><Link to="/contato">Contato</Link><Link to="/como-comprar">Como comprar</Link><Link to="/perguntas-frequentes">Perguntas frequentes</Link><Link to="/politica-de-privacidade">Privacidade</Link><Link to="/termos-de-compra">Termos</Link><Link to="/cancelamento-e-reembolso">Cancelamento</Link></nav>
         <div className="footer-contact"><strong>Atendimento</strong><a href={`mailto:${encodeURIComponent(institution.email)}`}>{institution.email}</a><a href={`https://wa.me/${whatsapp}`} target="_blank" rel="noreferrer">{institution.phone}</a><span>{institution.address}</span><small>{institution.hours}</small></div>
       </div>
@@ -107,6 +107,7 @@ function StoreRoutes() {
     <Route path="/" element={<Home />} />
     <Route path="/buscar" element={<Catalog />} />
     <Route path="/ingressos" element={<Catalog kind="ticket" />} />
+    <Route path="/ensaio-tecnico" element={<Catalog kind="ticket" categorySlug="ensaio-tecnico" />} />
     <Route path="/transfers" element={<Catalog kind="transfer" />} />
     <Route path="/city-tours" element={<Catalog kind="tour" />} />
     <Route path="/metro" element={<Catalog kind="metro" />} />
