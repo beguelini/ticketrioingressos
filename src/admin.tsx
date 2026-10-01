@@ -4,14 +4,14 @@ import { useStore } from './storeContext'
 import { money, supabase } from './store'
 import { validateImport } from './csv'
 
-type Field = { key: string; label: string; kind?: 'number' | 'boolean' | 'date' | 'json' | 'textarea' | 'select'; options?: string[]; required?: boolean }
+type Field = { key: string; label: string; kind?: 'number' | 'boolean' | 'date' | 'json' | 'textarea' | 'select' | 'category'; options?: string[]; required?: boolean }
 type Module = { table: string; title: string; key?: string; fields: Field[]; roles: string[]; readOnly?: boolean }
 const modules: Module[] = [
   { table: 'store_products', title: 'Produtos', roles: ['administrator','commercial'], fields: [
     { key: 'sku', label: 'SKU', required: true }, { key: 'slug', label: 'Slug', required: true },
     { key: 'name_pt', label: 'Nome', required: true }, { key: 'name_en', label: 'Nome em inglês' },
     { key: 'kind', label: 'Tipo', kind: 'select', options: ['ticket','transfer','tour','metro','apparel','package'], required: true },
-    { key: 'category_id', label: 'ID da categoria' }, { key: 'event_date_id', label: 'ID da data do evento' },
+    { key: 'category_id', label: 'Categoria', kind: 'category' }, { key: 'event_date_id', label: 'ID da data do evento' },
     { key: 'summary_pt', label: 'Resumo', kind: 'textarea' }, { key: 'description_pt', label: 'Descrição', kind: 'textarea' },
     { key: 'summary_en', label: 'Resumo em inglês', kind: 'textarea' }, { key: 'description_en', label: 'Descrição em inglês', kind: 'textarea' },
     { key: 'image_url', label: 'URL da imagem' }, { key: 'gallery', label: 'Galeria (JSON)', kind: 'json' }, { key: 'video_url', label: 'URL do vídeo' },
@@ -114,6 +114,7 @@ const csvValue = (value: unknown) => `"${display(value).replace(/"/g, '""')}"`
 
 function AdminTable({ module }: { module: Module }) {
   const [rows, setRows] = useState<Record<string, unknown>[]>([])
+  const [categoryChoices, setCategoryChoices] = useState<{ id: string; name_pt: string; status: string }[]>([])
   const [edit, setEdit] = useState<Record<string, unknown> | null>(null)
   const [message, setMessage] = useState('')
   const [search, setSearch] = useState('')
@@ -127,6 +128,7 @@ function AdminTable({ module }: { module: Module }) {
     setMessage(error ? `Não foi possível carregar: ${error.message}` : '')
   }, [module.table])
   useEffect(() => { void load(); setEdit(null); setImportRows([]) }, [load])
+  useEffect(() => { if (module.table === 'store_products' && supabase) void supabase.from('store_categories').select('id,name_pt,status').order('sort_order').then(({ data }) => setCategoryChoices(data ?? [])) }, [module.table])
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!supabase || !edit) return
@@ -185,7 +187,7 @@ function AdminTable({ module }: { module: Module }) {
     <label className="field">Buscar<input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Filtrar registros" /></label>
     {['store_products','product_variants'].includes(module.table) && <div className="import-panel"><strong>Importar CSV com prévia</strong><p>Modelo: {module.table === 'store_products' ? 'sku,slug,name_pt,kind,summary_pt' : 'sku,product_id,name_pt,price_cents,currency'}. Sem sobrescrita; registros importados ficam indisponíveis.</p><input type="file" accept=".csv,text/csv" onChange={(event) => { const file = event.target.files?.[0]; if (file) void previewCsv(file) }} />{importRows.length > 0 && <><p>Prévia de {importRows.length} registro(s): {importRows.slice(0, 3).map((row) => String(row.sku)).join(', ')}</p><button className="button" type="button" onClick={() => void confirmImport()}>Confirmar gravação</button></>}</div>}
     {message && <p role="status" className="admin-message">{message}</p>}
-    {edit && <form className="admin-form" onSubmit={(event) => void save(event)}><h3>{edit[key] ? 'Editar' : 'Novo'} · {module.title}</h3>{module.fields.map((field) => <label key={field.key}>{field.label}{field.kind === 'boolean' ? <input type="checkbox" checked={Boolean(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.checked })} /> : field.kind === 'select' ? <select required={field.required} value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })}><option value="">Selecione</option>{field.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select> : field.kind === 'textarea' || field.kind === 'json' ? <textarea required={field.required} value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })} /> : <input required={field.required} type={field.kind === 'number' ? 'number' : field.kind === 'date' ? 'date' : 'text'} value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })} />}</label>)}{module.table === 'store_products' && <label>Enviar imagem JPG, PNG ou WebP<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadImage(file) }} /></label>}<div className="admin-actions"><button className="button" type="submit">Salvar</button><button className="secondary-button" type="button" onClick={() => setEdit(null)}>Cancelar</button></div></form>}
+    {edit && <form className="admin-form" onSubmit={(event) => void save(event)}><h3>{edit[key] ? 'Editar' : 'Novo'} · {module.title}</h3>{module.fields.map((field) => <label key={field.key}>{field.label}{field.kind === 'boolean' ? <input type="checkbox" checked={Boolean(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.checked })} /> : field.kind === 'category' ? <select value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })}><option value="">Selecione a categoria</option>{categoryChoices.map((category) => <option key={category.id} value={category.id}>{category.name_pt}{category.status !== 'published' ? ' (rascunho)' : ''}</option>)}</select> : field.kind === 'select' ? <select required={field.required} value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })}><option value="">Selecione</option>{field.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select> : field.kind === 'textarea' || field.kind === 'json' ? <textarea required={field.required} value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })} /> : <input required={field.required} type={field.kind === 'number' ? 'number' : field.kind === 'date' ? 'date' : 'text'} value={display(edit[field.key])} onChange={(event) => setEdit({ ...edit, [field.key]: event.target.value })} />}</label>)}{module.table === 'store_products' && <label>Enviar imagem JPG, PNG ou WebP<input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadImage(file) }} /></label>}<div className="admin-actions"><button className="button" type="submit">Salvar</button><button className="secondary-button" type="button" onClick={() => setEdit(null)}>Cancelar</button></div></form>}
     {visible.length ? <div className="admin-table-wrap"><table><thead><tr>{columns.map((column) => <th key={column}>{column}</th>)}{!module.readOnly && <th>Ação</th>}</tr></thead><tbody>{visible.map((row, index) => <tr key={display(row[key]) || index}>{columns.map((column) => <td key={column} title={display(row[column])}>{display(row[column]).slice(0, 90)}</td>)}{!module.readOnly && <td><button className="text-button" type="button" onClick={() => setEdit(row)}>Editar</button></td>}</tr>)}</tbody></table></div> : <p>Nenhum registro encontrado.</p>}
   </section>
 }

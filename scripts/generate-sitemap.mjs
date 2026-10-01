@@ -2,7 +2,7 @@ import { writeFile } from 'node:fs/promises'
 
 const base = process.env.VITE_SITE_URL || 'https://ticketrioingressos.com.br'
 const paths = [
-  '/', '/ingressos', '/transfers', '/city-tours', '/metro', '/camisetas',
+  '/', '/ingressos', '/ensaio-tecnico', '/transfers', '/city-tours', '/metro', '/camisetas',
   '/camarotes', '/sambodromo', '/ordem-dos-desfiles', '/sobre', '/contato',
   '/como-comprar', '/perguntas-frequentes', '/politica-de-privacidade',
   '/termos-de-compra', '/cancelamento-e-reembolso',
