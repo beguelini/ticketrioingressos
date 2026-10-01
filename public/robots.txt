@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /conta
+Disallow: /checkout
+Sitemap: https://ticketrioingressos.com.br/sitemap.xml
