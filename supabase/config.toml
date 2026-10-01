@@ -1,0 +1,5 @@
+[functions.pagarme-checkout]
+verify_jwt = true
+
+[functions.pagarme-webhook]
+verify_jwt = false
