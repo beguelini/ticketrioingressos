@@ -46,7 +46,7 @@ export type Variant = {
   attributes: Record<string, unknown>
 }
 export type CatalogProduct = Product & { product_variants: Variant[] }
-export type CartLine = { variant_id: string; quantity: number }
+export type CartLine = { variant_id: string; quantity: number; service_date?: string; pickup_point?: string }
 export type Language = 'pt' | 'en'
 export type Institution = { name: string; cnpj: string; phone: string; whatsapp: string; email: string; address: string; hours: string; confirmed: boolean }
 export const referenceInstitution: Institution = {

@@ -44,14 +44,24 @@ export function useCart(userId: string | null) {
     void reconcile()
     return () => { cancelled = true }
   }, [userId])
-  const add = (variantId: string, quantity: number) => setLines((current) => {
+  const add = (variantId: string, quantity: number, selection?: Pick<CartLine, 'service_date' | 'pickup_point'>) => setLines((current) => {
     const existing = current.find((line) => line.variant_id === variantId)
     const next = existing
-      ? current.map((line) => line.variant_id === variantId ? { ...line, quantity: Math.min(20, line.quantity + quantity) } : line)
-      : [...current, { variant_id: variantId, quantity }]
+      ? current.map((line) => line.variant_id === variantId ? {
+        ...line,
+        quantity: selection && (line.service_date !== selection.service_date || line.pickup_point !== selection.pickup_point)
+          ? quantity : Math.min(20, line.quantity + quantity),
+        ...selection,
+      } : line)
+      : [...current, { variant_id: variantId, quantity, ...selection }]
     if (userId && supabase) void supabase.from('cart_items').upsert({ user_id: userId, variant_id: variantId, quantity: next.find((line) => line.variant_id === variantId)?.quantity ?? quantity })
     return next
   })
+  const setQuantity = (variantId: string, quantity: number) => {
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) return
+    setLines((current) => current.map((line) => line.variant_id === variantId ? { ...line, quantity } : line))
+    if (userId && supabase) void supabase.from('cart_items').upsert({ user_id: userId, variant_id: variantId, quantity })
+  }
   const remove = (variantId: string) => {
     setLines((current) => current.filter((line) => line.variant_id !== variantId))
     if (userId && supabase) void supabase.from('cart_items').delete().eq('user_id', userId).eq('variant_id', variantId)
@@ -60,5 +70,5 @@ export function useCart(userId: string | null) {
     setLines([])
     if (userId && supabase) void supabase.from('cart_items').delete().eq('user_id', userId)
   }
-  return { lines, add, remove, clear, count: lines.reduce((sum, line) => sum + line.quantity, 0) }
+  return { lines, add, setQuantity, remove, clear, count: lines.reduce((sum, line) => sum + line.quantity, 0) }
 }

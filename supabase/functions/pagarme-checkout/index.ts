@@ -16,7 +16,7 @@ function respond(body: unknown, status = 200) {
   } })
 }
 
-type CheckoutRequest = { lines?: { variant_id: string; quantity: number }[]; request_key?: string; terms_version?: number }
+type CheckoutRequest = { lines?: { variant_id: string; quantity: number; service_date?: string; pickup_point?: string }[]; request_key?: string; terms_version?: number }
 type PaymentLink = { id?: string; url?: string; errors?: unknown; message?: string }
 
 Deno.serve(async (req) => {
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     }
     const [{ data: order, error: orderError }, { data: orderItems, error: itemsError }] = await Promise.all([
       admin.from('orders').select('id,customer_id,order_number,status,total_cents,expires_at,pagarme_link_id,pagarme_checkout_url').eq('id', orderId).single(),
-      admin.from('order_items').select('product_name,variant_name,quantity,unit_price_cents').eq('order_id', orderId),
+      admin.from('order_items').select('product_name,variant_name,quantity,unit_price_cents,attributes').eq('order_id', orderId),
     ])
     if (orderError || itemsError || !order || !orderItems?.length || order.customer_id !== user.id ||
       order.status !== 'pending_payment' || new Date(order.expires_at).getTime() <= Date.now()) {
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       type: 'order', name: `Ticket Rio #${order.order_number}`, order_code: order.id,
       expires_in: 30, max_paid_sessions: 1,
       cart_settings: { items: orderItems.map((item) => ({
-        name: `${item.product_name} · ${item.variant_name}`.slice(0, 180),
+        name: `${item.product_name} · ${item.variant_name}${item.attributes?.service_date ? ` · ${item.attributes.service_date}` : ''}`.slice(0, 180),
         amount: item.unit_price_cents, default_quantity: item.quantity,
       })) },
       layout_settings: { primary_color: '#086be9', secondary_color: '#ffffff' },
