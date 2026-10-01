@@ -18,6 +18,7 @@ function respond(body: unknown, status = 200) {
 
 type CheckoutRequest = { lines?: { variant_id: string; quantity: number; service_date?: string; pickup_point?: string }[]; request_key?: string; terms_version?: number }
 type PaymentLink = { id?: string; url?: string; errors?: unknown; message?: string }
+const checkoutUrlPattern = /^https:\/\/payment-link(?:-v3)?\.pagar\.me\/pl_[A-Za-z0-9]+$/
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return respond({ ok: true })
@@ -86,9 +87,8 @@ Deno.serve(async (req) => {
           accepted_payment_methods: methods, statement_descriptor: 'TICKET RIO',
         }
         if (methods.includes('credit_card')) paymentSettings.credit_card_settings = {
-          operation_type: 'auth_and_capture', installments_setup: {
-            max_installments: installments, amount, free_installments: installments,
-          },
+          operation_type: 'auth_and_capture',
+          installments: Array.from({ length: installments }, (_, index) => ({ number: index + 1, total: amount })),
         }
         if (methods.includes('pix')) paymentSettings.pix_settings = { expires_in: 3600 }
         if (methods.includes('boleto')) paymentSettings.boleto_settings = { due_in: 3 }
@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       }
       if (link) break
     }
-    if (!link?.id || !link.url || !/^https:\/\/payment-link\.pagar\.me\//.test(link.url)) {
+    if (!link?.id || !link.url || !checkoutUrlPattern.test(link.url)) {
       return respond({ error: 'provider_unavailable' }, 503)
     }
     const { error: saveError } = await admin.rpc('record_pagarme_link', {

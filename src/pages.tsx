@@ -5,6 +5,15 @@ import { categories, money, supabase, type CatalogProduct, type ProductKind } fr
 import { track } from './analytics'
 import { ParadeHomeSection } from './ParadeExperience'
 
+function isPagarmeCheckoutUrl(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' && ['payment-link.pagar.me', 'payment-link-v3.pagar.me'].includes(url.hostname) &&
+      /^\/pl_[A-Za-z0-9]+$/.test(url.pathname) && !url.search && !url.hash
+  } catch { return false }
+}
+
 function Empty({ title, detail, action }: { title: string; detail: string; action?: React.ReactNode }) {
   return <div className="empty-state"><span aria-hidden="true">✳</span><h2>{title}</h2><p>{detail}</p>{action}</div>
 }
@@ -239,7 +248,7 @@ export function CheckoutPage() {
       const { data, error: paymentError } = await supabase.functions.invoke('pagarme-checkout', {
         body: { lines: cart.lines, request_key: key, terms_version: termsVersion },
       })
-      if (paymentError || !data?.checkout_url || new URL(data.checkout_url).hostname !== 'payment-link.pagar.me') {
+      if (paymentError || !isPagarmeCheckoutUrl(data?.checkout_url)) {
         throw new Error('payment_unavailable')
       }
       window.location.assign(data.checkout_url)
@@ -391,6 +400,6 @@ export function OrderPage() {
   if (loading) return <div className="page-container narrow-page"><p role="status">Carregando pedido…</p></div>
   if (!order) return <div className="page-container narrow-page"><Empty title="Pedido não encontrado" detail="Este pedido não existe ou não pertence à sua conta." /></div>
   const deliveryLabels: Record<string, string> = { awaiting_supplier: 'Aguardando fornecedor', processing: 'Em processamento', available_official_app: 'Disponibilizado no aplicativo oficial', missing_data: 'Pendência de dados', delivery_issue: 'Problema na entrega', cancelled: 'Cancelado' }
-  const canResume = order.payment_status === 'pending' && order.pagarme_checkout_url?.startsWith('https://payment-link.pagar.me/') && Date.now() - new Date(order.created_at).getTime() < 30 * 60_000
+  const canResume = order.payment_status === 'pending' && isPagarmeCheckoutUrl(order.pagarme_checkout_url) && Date.now() - new Date(order.created_at).getTime() < 30 * 60_000
   return <div className="page-container narrow-page"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>Pedido #{order.order_number}</h1></div><div className="checkout-card"><p>Pedido: {order.status}</p><p>Pagamento: {order.payment_status}</p><p>Entrega: {order.delivery_status}</p>{order.order_items.map((item) => { const delivery = deliveries.find((entry) => entry.order_item_id === item.id); return <div key={item.id}><p><span>{item.quantity} × {item.product_name} · {item.variant_name}{typeof item.attributes.service_date === 'string' && <small className="checkout-line-detail">Data: {new Date(`${item.attributes.service_date}T12:00:00`).toLocaleDateString('pt-BR')}{typeof item.attributes.pickup_point === 'string' ? ` · Embarque: ${item.attributes.pickup_point}` : ''}</small>}</span><strong>{money(item.quantity * item.unit_price_cents)}</strong></p>{delivery && <div className="delivery-detail"><strong>Entrega oficial: {deliveryLabels[delivery.status] ?? delivery.status}</strong>{delivery.supplier && <span>Fornecedor: {delivery.supplier}</span>}{delivery.recipient_email && <span>Destinatário: {delivery.recipient_email}</span>}{delivery.available_at && <span>Disponibilizado em: {new Date(delivery.available_at).toLocaleDateString('pt-BR')}</span>}{delivery.instructions && <p>{delivery.instructions}</p>}</div>}</div> })}<div className="order-total"><span>Total</span><strong>{money(order.total_cents)}</strong></div>{canResume && <a className="button" href={order.pagarme_checkout_url!}>Continuar pagamento seguro →</a>}<button className="text-button" type="button" onClick={() => window.location.reload()}>Atualizar status</button></div><div className="pending-notice"><strong>Comprovante ≠ ingresso oficial</strong><p>Para ingressos oficiais, acompanhe o status de entrega. O acesso ao evento depende do ingresso disponibilizado pelo fornecedor no aplicativo oficial.</p></div></div>
 }
