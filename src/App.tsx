@@ -17,6 +17,7 @@ function Seo() {
       '/ingressos': 'Ingressos', '/ensaio-tecnico': 'Ensaio Técnico', '/transfers': 'Transfers',
       '/city-tours': 'Rio City Tour', '/camarotes': 'Camarotes',
       '/sambodromo': 'Sambódromo', '/ordem-dos-desfiles': 'Ordem dos desfiles',
+      '/sobre': '25 anos de história',
     }
     document.title = `${names[pathname] ?? 'Loja'} | Ticket Rio`
     const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]') ?? document.createElement('link')
@@ -55,7 +56,11 @@ function Shell({ children }: { children: React.ReactNode }) {
   }
   return <>
     <Seo />
-    <div className="announcement"><span className="announcement__dot" />{tr('O Rio espera por você', 'Rio is waiting for you', language)}</div>
+    <Link className="anniversary-ribbon" to="/sobre" onClick={() => setMenu(false)}>
+      <span className="anniversary-ribbon__number" aria-hidden="true">25</span>
+      <span className="anniversary-ribbon__copy"><strong>{tr('25 anos de Ticket Rio', '25 years of Ticket Rio', language)}</strong><span>{tr('Uma história vivida com o Rio.', 'A story lived with Rio.', language)}</span></span>
+      <span className="anniversary-ribbon__arrow" aria-hidden="true">↗</span>
+    </Link>
     <header className="site-header">
       <Link className="brand" to="/" onClick={() => setMenu(false)} aria-label="Ticket Rio — início"><img src="/ticket-rio-carnaval.png" alt="Ticket Rio" /></Link>
       <nav className={menu ? 'nav nav--open' : 'nav'} aria-label="Navegação principal">
@@ -71,6 +76,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     </header>
     <main>{children}</main>
     <footer className="site-footer">
+      <div className="footer-anniversary"><span className="footer-anniversary__number" aria-hidden="true">25</span><div><strong>{tr('Há 25 anos, o Rio faz parte da nossa história.', 'For 25 years, Rio has been part of our story.', language)}</strong><span>{tr('Carnaval, experiências e encontros que ficam na memória.', 'Carnival, experiences and moments to remember.', language)}</span></div><Link to="/sobre">{tr('Conheça a Ticket Rio', 'Get to know Ticket Rio', language)} <span aria-hidden="true">↗</span></Link></div>
       <div className="footer-main">
         <div><Link className="footer-brand" to="/"><img src="/ticket-rio-carnaval.png" alt="Ticket Rio" /></Link><p>O Rio para sentir, viver e lembrar.</p><small>{institution.name} · CNPJ {institution.cnpj}{!institution.confirmed && ' · Dados sujeitos a confirmação.'}</small></div>
         <nav className="footer-links" aria-label="Loja"><Link to="/ingressos">Ingressos</Link><Link to="/ensaio-tecnico">Ensaio Técnico</Link><Link to="/transfers">Transfers</Link><Link to="/city-tours">Rio City Tour</Link><Link to="/metro">Metrô</Link><Link to="/camisetas">Camisetas</Link><Link to="/camarotes">Camarotes</Link></nav>
