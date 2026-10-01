@@ -5,7 +5,7 @@ const paths = [
   '/', '/ingressos', '/ensaio-tecnico', '/transfers', '/city-tours', '/metro', '/camisetas',
   '/camarotes', '/sambodromo', '/ordem-dos-desfiles', '/sobre', '/contato',
   '/como-comprar', '/perguntas-frequentes', '/politica-de-privacidade',
-  '/termos-de-compra', '/cancelamento-e-reembolso',
+  '/politica-de-cookies', '/termos-de-uso', '/termos-de-compra', '/cancelamento-e-reembolso',
 ]
 const url = process.env.VITE_SUPABASE_URL
 const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
