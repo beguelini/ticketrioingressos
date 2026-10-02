@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import './styles.css'
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router'
 import type { User } from '@supabase/supabase-js'
 import { fetchCatalog, fetchInstitution, fetchUser, referenceInstitution, supabase, type CatalogProduct, type Language } from './store'
@@ -6,9 +7,9 @@ import { useCart } from './useCart'
 import { StoreContext, tr, useStore } from './storeContext'
 import { Home, Catalog, ProductPage, CartPage, CheckoutPage, StaticPage, FaqPage, ContactPage, AccountPage, AuthPage, OrderPage } from './pages'
 import { ParadePage } from './ParadeExperience'
-import { AdminPage } from './admin'
 import { startAnalytics, track } from './analytics'
 import { readConsent, saveConsent } from './consent'
+import { captureAttribution } from './attribution'
 
 function Seo() {
   const { pathname } = useLocation()
@@ -54,9 +55,11 @@ function Shell({ children }: { children: React.ReactNode }) {
   const [analyticsChoice, setAnalyticsChoice] = useState(consent?.analytics ?? false)
   const [marketingChoice, setMarketingChoice] = useState(consent?.marketing ?? false)
   useEffect(() => { if (consent) { startAnalytics(); track('page_view', { path: window.location.pathname }) } }, [consent])
+  useEffect(() => { captureAttribution() }, [])
   const chooseConsent = (analytics: boolean, marketing: boolean) => {
     const previous = readConsent()
     const next = saveConsent(analytics, marketing)
+    captureAttribution()
     setConsent(next)
     setAnalyticsChoice(analytics)
     setMarketingChoice(marketing)
@@ -156,7 +159,6 @@ function StoreRoutes() {
     <Route path="/pedidos/:id" element={<OrderPage />} />
     <Route path="/carrinho" element={<CartPage />} />
     <Route path="/checkout" element={<CheckoutPage />} />
-    <Route path="/admin/*" element={<AdminPage />} />
     {legacyRoutes.map(([from, to]) => <Route key={from} path={from} element={<Navigate to={to} replace />} />)}
     <Route path="*" element={<div className="page-container"><h1>Página não encontrada</h1><Link to="/">Voltar ao início</Link></div>} />
   </Routes></Shell>

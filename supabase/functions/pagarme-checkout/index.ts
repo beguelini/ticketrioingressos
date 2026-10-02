@@ -16,7 +16,7 @@ function respond(body: unknown, status = 200) {
   } })
 }
 
-type CheckoutRequest = { lines?: { variant_id: string; quantity: number; service_date?: string; pickup_point?: string }[]; request_key?: string; terms_version?: number }
+type CheckoutRequest = { lines?: { variant_id: string; quantity: number; service_date?: string; pickup_point?: string }[]; request_key?: string; terms_version?: number; attribution?: { utm_source?: string; utm_medium?: string | null; utm_campaign?: string } | null }
 type PaymentLink = { id?: string; url?: string; errors?: unknown; message?: string }
 const checkoutUrlPattern = /^https:\/\/payment-link(?:-v3)?\.pagar\.me\/pl_[A-Za-z0-9]+$/
 
@@ -55,6 +55,16 @@ Deno.serve(async (req) => {
     if (orderError || itemsError || !order || !orderItems?.length || order.customer_id !== user.id ||
       order.status !== 'pending_payment' || new Date(order.expires_at).getTime() <= Date.now()) {
       return respond({ error: 'order_unavailable' }, 409)
+    }
+    const source = input.attribution?.utm_source
+    const campaign = input.attribution?.utm_campaign
+    if (source && campaign && /^[a-z0-9 _.-]{1,80}$/.test(source) && /^[a-z0-9 _.-]{1,120}$/.test(campaign)) {
+      const medium = input.attribution?.utm_medium
+      const { error: attributionError } = await admin.from('order_attribution').upsert({
+        order_id: order.id, utm_source: source, utm_campaign: campaign,
+        utm_medium: medium && /^[a-z0-9 _.-]{1,80}$/.test(medium) ? medium : null,
+      }, { onConflict: 'order_id', ignoreDuplicates: true })
+      if (attributionError) console.error('Order attribution save failed', order.id, attributionError.message)
     }
     if (order.pagarme_link_id && order.pagarme_checkout_url) {
       return respond({ order_id: order.id, checkout_url: order.pagarme_checkout_url })
