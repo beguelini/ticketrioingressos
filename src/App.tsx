@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import './styles.css'
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router'
 import type { User } from '@supabase/supabase-js'
@@ -10,6 +10,7 @@ import { ParadePage } from './ParadeExperience'
 import { startAnalytics, track } from './analytics'
 import { readConsent, saveConsent } from './consent'
 import { captureAttribution } from './attribution'
+const SupportChat = lazy(() => import('./SupportChat'))
 
 function Seo() {
   const { pathname } = useLocation()
@@ -47,8 +48,6 @@ function Shell({ children }: { children: React.ReactNode }) {
   const whatsapp = /^\d{10,15}$/.test(institution.whatsapp) ? institution.whatsapp : referenceInstitution.whatsapp
   const [menu, setMenu] = useState(false)
   const [chat, setChat] = useState(false)
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<string[]>(['Olá! Sou um assistente demonstrativo. Para atendimento humano, use a página de contato.'])
   const [consent, setConsent] = useState(readConsent)
   const [consentOpen, setConsentOpen] = useState(!consent)
   const [consentDetails, setConsentDetails] = useState(false)
@@ -106,12 +105,8 @@ function Shell({ children }: { children: React.ReactNode }) {
     </footer>
     {consentOpen && <section className={consentDetails ? 'consent-banner consent-banner--detailed' : 'consent-banner'} aria-label={tr('Preferências de cookies', 'Cookie preferences', language)}><div className="consent-banner__intro"><strong>{tr('Sua privacidade, suas escolhas', 'Your privacy, your choice', language)}</strong><p>{tr('Usamos armazenamento necessário para a loja. Medição e publicidade só são ativadas com sua escolha, quando configuradas.', 'We use necessary storage for the store. Measurement and advertising run only with your choice, when configured.', language)} <Link to="/politica-de-cookies">{tr('Entenda os cookies', 'About cookies', language)}</Link> · <Link to="/politica-de-privacidade">{tr('Privacidade', 'Privacy', language)}</Link></p></div>{consentDetails && <div className="consent-categories"><div><strong>{tr('Necessários', 'Necessary', language)}</strong><span>{tr('Conta, carrinho, idioma e sua escolha de privacidade.', 'Account, cart, language and your privacy choice.', language)}</span><em>{tr('Sempre ativos', 'Always on', language)}</em></div><label><span><strong>{tr('Medição', 'Analytics', language)}</strong><small>{tr('Entender como o site é usado, quando houver ferramenta configurada.', 'Understand site use when a measurement tool is configured.', language)}</small></span><input type="checkbox" checked={analyticsChoice} onChange={(event) => setAnalyticsChoice(event.target.checked)} /></label><label><span><strong>{tr('Publicidade', 'Advertising', language)}</strong><small>{tr('Medir campanhas e anúncios, quando houver ferramenta configurada.', 'Measure campaigns and ads when a tool is configured.', language)}</small></span><input type="checkbox" checked={marketingChoice} onChange={(event) => setMarketingChoice(event.target.checked)} /></label></div>}<div className="consent-banner__actions"><button className="secondary-button" type="button" onClick={() => chooseConsent(false, false)}>{tr('Rejeitar opcionais', 'Reject optional', language)}</button>{consentDetails ? <button className="secondary-button" type="button" onClick={() => chooseConsent(analyticsChoice, marketingChoice)}>{tr('Salvar escolhas', 'Save choices', language)}</button> : <button className="secondary-button" type="button" onClick={() => setConsentDetails(true)}>{tr('Personalizar', 'Customize', language)}</button>}<button className="button" type="button" onClick={() => chooseConsent(true, true)}>{tr('Aceitar opcionais', 'Accept optional', language)}</button></div></section>}
     <div className="support">
-      <button className="support-button" type="button" onClick={() => setChat(!chat)} aria-label={chat ? 'Fechar chat demonstrativo' : 'Abrir chat demonstrativo'} aria-expanded={chat}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-4.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 4 8.5 8.5 0 0 1 21 12.5" /><path d="M8 12h8M8 15h5" /></svg></button>
-      {chat && <section className="support-panel" aria-label="Chat demonstrativo">
-        <div className="support-panel__header"><strong>Ticket Rio</strong><small>Atendimento simulado</small><button type="button" onClick={() => setChat(false)} aria-label="Fechar">×</button></div>
-        <div className="support-panel__messages" role="log" aria-live="polite">{messages.map((item, index) => <p className={index % 2 ? 'chat-message chat-message--visitor' : 'chat-message chat-message--bot'} key={index}>{item}</p>)}</div>
-        <form className="support-panel__form" onSubmit={(event) => { event.preventDefault(); if (message.trim()) { setMessages((items) => [...items, message.trim(), 'Este chat é demonstrativo e não registra pedidos. Escreva para atendimento@ticketrio.com.br para falar com a equipe.']); setMessage('') } }}><label className="sr-only" htmlFor="chat-message">Mensagem</label><input id="chat-message" value={message} onChange={(event) => setMessage(event.target.value)} maxLength={240} placeholder="Sua mensagem" /><button type="submit" aria-label="Enviar">➜</button></form>
-      </section>}
+      <button className="support-button" type="button" onClick={() => setChat(!chat)} aria-label={chat ? 'Fechar atendimento' : 'Abrir atendimento'} aria-expanded={chat}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-4.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 4 8.5 8.5 0 0 1 21 12.5" /><path d="M8 12h8M8 15h5" /></svg></button>
+      {chat && <Suspense fallback={<section className="support-panel" aria-label="Carregando atendimento">Carregando atendimento…</section>}><SupportChat onClose={() => setChat(false)} /></Suspense>}
     </div>
   </>
 }

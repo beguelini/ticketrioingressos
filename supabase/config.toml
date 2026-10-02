@@ -3,3 +3,9 @@ verify_jwt = true
 
 [functions.pagarme-webhook]
 verify_jwt = false
+
+[functions.support-visitor]
+verify_jwt = false
+
+[functions.support-staff]
+verify_jwt = true
