@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { tr, useStore } from './storeContext'
 import { categories, money, supabase, type CatalogProduct, type ProductKind } from './store'
 import { track } from './analytics'
+import { getAttribution } from './attribution'
 import { ParadeHomeSection } from './ParadeExperience'
 
 function isPagarmeCheckoutUrl(value: unknown): value is string {
@@ -246,7 +247,7 @@ export function CheckoutPage() {
       const key = createdAt === stored?.createdAt && stored?.key ? stored.key : crypto.randomUUID()
       sessionStorage.setItem('ticket-rio-checkout-request', JSON.stringify({ fingerprint: cartFingerprint, key, createdAt }))
       const { data, error: paymentError } = await supabase.functions.invoke('pagarme-checkout', {
-        body: { lines: cart.lines, request_key: key, terms_version: termsVersion },
+        body: { lines: cart.lines, request_key: key, terms_version: termsVersion, attribution: getAttribution() },
       })
       if (paymentError || !isPagarmeCheckoutUrl(data?.checkout_url)) {
         throw new Error('payment_unavailable')
@@ -307,7 +308,7 @@ export function ContactPage() {
     event.preventDefault()
     if (!user || !supabase) return
     const form = new FormData(event.currentTarget)
-    const { error } = await supabase.from('inquiries').insert({ customer_id: user.id, name: String(form.get('name') ?? ''), email: user.email, phone: String(form.get('phone') ?? ''), message: message.trim(), product_id: selectedProduct?.id ?? null })
+    const { error } = await supabase.from('inquiries').insert({ customer_id: user.id, name: String(form.get('name') ?? ''), email: user.email, phone: String(form.get('phone') ?? ''), message: message.trim(), product_id: selectedProduct?.id ?? null, ...getAttribution() })
     setStatus(error ? 'Não foi possível enviar agora. Tente novamente pelo e-mail.' : 'Consulta recebida. Nossa equipe poderá responder pelo e-mail da sua conta.')
     if (!error) setMessage('')
   }

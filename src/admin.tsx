@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import { Link, useSearchParams } from 'react-router'
-import { useStore } from './storeContext'
+import { lazy, Suspense, useCallback, useEffect, useState, type FormEvent } from 'react'
+import type { User } from '@supabase/supabase-js'
+import { useSearchParams } from 'react-router'
 import { money, supabase } from './store'
 import { validateImport } from './csv'
+const CRM = lazy(() => import('./adminCRM'))
+const Media = lazy(() => import('./adminMedia'))
+const Team = lazy(() => import('./adminTeam'))
 
 type Field = { key: string; label: string; kind?: 'number' | 'boolean' | 'date' | 'json' | 'textarea' | 'select' | 'category'; options?: string[]; required?: boolean }
 type Module = { table: string; title: string; key?: string; fields: Field[]; roles: string[]; readOnly?: boolean }
@@ -212,8 +215,7 @@ function Dashboard() {
   return <section className="admin-panel"><span className="section-kicker">VISÃO GERAL</span><h2>Operação Ticket Rio</h2><div className="metric-grid"><div><small>Receita aprovada</small><strong>{money(counts.approvedRevenue)}</strong></div><div><small>Pedidos</small><strong>{counts.orders}</strong></div><div><small>Produtos cadastrados</small><strong>{counts.products}</strong></div><div><small>Consultas</small><strong>{counts.inquiries}</strong></div><div><small>Entregas pendentes</small><strong>{counts.pendingDeliveries}</strong></div><div><small>Ticket médio aprovado</small><strong>{counts.approvedOrders ? money(Math.round(counts.approvedRevenue / counts.approvedOrders)) : '—'}</strong></div></div><p>Ticket médio = receita de pedidos com pagamento aprovado ÷ quantidade desses pedidos.</p></section>
 }
 
-export function AdminPage() {
-  const { user } = useStore()
+export function AdminPage({ user, onSignOut }: { user: User; onSignOut: () => void }) {
   const [params, setParams] = useSearchParams()
   const [role, setRole] = useState<string | null>(null)
   const [checked, setChecked] = useState(false)
@@ -222,8 +224,10 @@ export function AdminPage() {
     void supabase.from('staff_roles').select('role').eq('user_id', user.id).maybeSingle().then(({ data }) => { setRole(data?.role ?? null); setChecked(true) })
   }, [user])
   if (!checked) return <div className="page-container"><p>Verificando acesso…</p></div>
-  if (!user || !role) return <div className="page-container narrow-page"><h1>Acesso restrito</h1><p>Esta área exige uma função interna autorizada.</p><Link to="/login">Entrar com conta autorizada</Link></div>
+  if (!role) return <div className="admin-access"><h1>Acesso restrito</h1><p>Esta conta não possui função interna autorizada.</p><button onClick={onSignOut}>Sair</button></div>
   const allowed = modules.filter((module) => module.roles.includes(role))
   const selected = allowed.find((module) => module.table === params.get('modulo'))
-  return <div className="admin-layout"><aside className="admin-sidebar"><Link to="/">← Ver loja</Link><h1>Painel Ticket Rio</h1><p>Função: {role}</p><button className={!selected ? 'admin-nav-current' : ''} type="button" onClick={() => setParams({})}>Dashboard</button>{allowed.map((module) => <button className={selected?.table === module.table ? 'admin-nav-current' : ''} key={module.table} type="button" onClick={() => setParams({ modulo: module.table })}>{module.title}</button>)}</aside><div className="admin-content">{selected ? <AdminTable module={selected} /> : <Dashboard />}</div></div>
+  const section = params.get('secao') ?? (role === 'marketing' ? 'media' : null)
+  const choose = (name: string) => setParams(name ? { secao: name } : {})
+  return <div className="admin-layout"><aside className="admin-sidebar"><div className="admin-brand"><span>TR</span><div><strong>Ticket Rio</strong><small>Controle</small></div></div><p className="admin-sidebar-label">VISÃO</p><button className={!section && !selected ? 'admin-nav-current' : ''} type="button" onClick={() => choose('')}>Visão geral</button>{['administrator','commercial'].includes(role) && <button className={section === 'crm' ? 'admin-nav-current' : ''} type="button" onClick={() => choose('crm')}>CRM de leads</button>}{['administrator','marketing'].includes(role) && <button className={section === 'media' ? 'admin-nav-current' : ''} type="button" onClick={() => choose('media')}>Mídia e campanhas</button>}{role === 'administrator' && <button className={section === 'team' ? 'admin-nav-current' : ''} type="button" onClick={() => choose('team')}>Equipe e acessos</button>}<p className="admin-sidebar-label">OPERAÇÃO</p>{allowed.filter((module) => !['inquiries','staff_roles'].includes(module.table)).map((module) => <button className={selected?.table === module.table ? 'admin-nav-current' : ''} key={module.table} type="button" onClick={() => setParams({ modulo: module.table })}>{module.title}</button>)}<div className="admin-sidebar-bottom"><small>{user.email}<br />{role}</small><button type="button" onClick={onSignOut}>Sair da conta</button></div></aside><main className="admin-content"><header className="admin-topbar"><span>PAINEL ADMINISTRATIVO</span><a href="/" target="_blank" rel="noreferrer">Abrir loja ↗</a></header><Suspense fallback={<p>Carregando seção…</p>}>{section === 'crm' && ['administrator','commercial'].includes(role) ? <CRM user={user} /> : section === 'media' && ['administrator','marketing'].includes(role) ? <Media user={user} /> : section === 'team' && role === 'administrator' ? <Team user={user} /> : selected ? <AdminTable module={selected} /> : <Dashboard />}</Suspense></main></div>
 }
