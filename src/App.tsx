@@ -5,7 +5,7 @@ import type { User } from '@supabase/supabase-js'
 import { fetchCatalog, fetchInstitution, fetchUser, referenceInstitution, supabase, type CatalogProduct, type Language } from './store'
 import { useCart } from './useCart'
 import { StoreContext, tr, useStore } from './storeContext'
-import { Home, Catalog, ProductPage, CartPage, CheckoutPage, StaticPage, FaqPage, ContactPage, AccountPage, AuthPage, OrderPage } from './pages'
+import { Home, Catalog, ProductPage, WhatsAppSalesPage, StaticPage, FaqPage, ContactPage, AccountPage, AuthPage, OrderPage } from './pages'
 import { ParadePage } from './ParadeExperience'
 import { startAnalytics, track } from './analytics'
 import { readConsent, saveConsent } from './consent'
@@ -152,8 +152,9 @@ function StoreRoutes() {
     <Route path="/redefinir-senha" element={<AuthPage mode="reset" />} />
     <Route path="/conta" element={<AccountPage />} />
     <Route path="/pedidos/:id" element={<OrderPage />} />
-    <Route path="/carrinho" element={<CartPage />} />
-    <Route path="/checkout" element={<CheckoutPage />} />
+    <Route path="/carrinho" element={<Navigate to="/atendimento-compra" replace />} />
+    <Route path="/atendimento-compra" element={<WhatsAppSalesPage />} />
+    <Route path="/checkout" element={<Navigate to="/atendimento-compra" replace />} />
     {legacyRoutes.map(([from, to]) => <Route key={from} path={from} element={<Navigate to={to} replace />} />)}
     <Route path="*" element={<div className="page-container"><h1>Página não encontrada</h1><Link to="/">Voltar ao início</Link></div>} />
   </Routes></Shell>
