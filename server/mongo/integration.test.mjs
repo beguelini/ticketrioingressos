@@ -5,6 +5,7 @@ import {database,initialize} from './db.mjs'
 import {handler} from './handler.mjs'
 import {passwordHash,digest} from './security.mjs'
 import {issueToken} from './auth.mjs'
+import {mediaReport} from './reports.mjs'
 import {quote,expire} from './commerce.mjs'
 const enabled=process.env.TICKETRIO_INTEGRATION==='1'
 if(enabled)process.loadEnvFile('.env.local')
@@ -51,6 +52,22 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
  it('only publishes approved catalog visibility',async()=>{const r=await call({kind:'query',table:'store_products'});expect(r.body.data.map((p)=>p.id)).toEqual(['published'])})
  it('allows admin access to drafts',async()=>expect((await call({kind:'query',table:'store_products'},adminCookie)).body.data).toHaveLength(2))
  it('isolates customer orders even when the client requests another owner',async()=>{const r=await call({kind:'query',table:'orders',filters:[{field:'customer_id',op:'eq',value:other.id}]},customerCookie);expect(r.body.data).toEqual([])})
+ it('restricts complete sale dossiers to authorized staff',async()=>{
+  await db.collection('customer_profiles').insertOne({id:'profile',user_id:customer.id,first_name:'Cliente',last_name:'Teste',document_number:'DEMO-001'})
+  const input={kind:'query',table:'orders',select:'*,order_items(*),sale_details(*)',filters:[{field:'id',op:'eq',value:'own-order'}]}
+  expect((await call(input,customerCookie)).status).toBe(403)
+  const result=await call(input,adminCookie)
+  expect(result.status).toBe(200);expect(result.body.data[0].customer.full_name).toBe('Cliente Teste')
+  expect(result.body.data[0].customer.email).toBe(customer.email)
+  expect(JSON.stringify(result.body)).not.toContain('password_hash')
+ })
+ it('excludes training orders from actual marketing revenue',async()=>{
+  const created_at='2026-10-20T12:00:00.000Z'
+  await db.collection('orders').insertMany([{id:'real-revenue',payment_status:'approved',total_cents:10000,created_at},{id:'training-revenue',is_training:true,payment_status:'approved',total_cents:999999,created_at}])
+  await db.collection('order_attribution').insertMany([{id:'real-attribution',order_id:'real-revenue',utm_source:'qa',utm_campaign:'qa'},{id:'training-attribution',order_id:'training-revenue',utm_source:'qa',utm_campaign:'qa'}])
+  const report=await mediaReport(db,{role:'administrator'},{from_date:'2026-10-01',to_date:'2026-10-31'})
+  expect(report.find(r=>r.utm_source==='qa').revenue_cents).toBe(10000)
+ })
  it('does not allow customer self-assignment of staff roles',async()=>expect((await call({kind:'query',table:'staff_roles',operation:'insert',values:{user_id:customer.id,role:'administrator'}},customerCookie)).status).toBe(403))
  it('does not allow clients to approve payments or orders',async()=>expect((await call({kind:'query',table:'orders',operation:'update',values:{payment_status:'approved'},filters:[{field:'id',op:'eq',value:'own-order'}]},customerCookie)).status).toBe(403))
  it('rejects query operator injection over HTTP',async()=>expect((await call({kind:'query',table:'store_products',filters:[{field:'status',op:'eq',value:{$ne:'draft'}}]})).status).toBe(400))
