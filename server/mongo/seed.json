@@ -1,0 +1,623 @@
+{
+  "store_settings": [
+    {
+      "key": "commerce_enabled",
+      "value": "false"
+    },
+    {
+      "key": "institutional",
+      "value": "{\n  \"name\":\"Ticket Rio Turismo\",\n  \"cnpj\":\"07.909.071/0001-50\",\n  \"phone\":\"(21) 2025-5000\",\n  \"whatsapp\":\"552120255000\",\n  \"email\":\"atendimento@ticketrio.com.br\",\n  \"address\":\"Av. das Américas, 700, bloco 8, loja 112 L, Barra da Tijuca, Rio de Janeiro\",\n  \"hours\":\"Segunda a sexta, 10h às 18h\",\n  \"confirmed\":false\n}"
+    }
+  ],
+  "store_categories": [
+    {
+      "slug": "ingressos",
+      "name_pt": "Ingressos",
+      "name_en": "Tickets",
+      "sort_order": 1
+    },
+    {
+      "slug": "transfers",
+      "name_pt": "Transfers",
+      "name_en": "Transfers",
+      "sort_order": 2
+    },
+    {
+      "slug": "city-tours",
+      "name_pt": "Rio City Tour",
+      "name_en": "Rio City Tours",
+      "sort_order": 3
+    },
+    {
+      "slug": "metro",
+      "name_pt": "Metrô",
+      "name_en": "Metro",
+      "sort_order": 4
+    },
+    {
+      "slug": "camisetas",
+      "name_pt": "Camisetas e abadás",
+      "name_en": "T-shirts and costumes",
+      "sort_order": 5
+    },
+    {
+      "slug": "camarotes",
+      "name_pt": "Camarotes",
+      "name_en": "VIP lounges",
+      "sort_order": 6
+    }
+  ],
+  "store_pages": [
+    {
+      "slug": "politica-de-privacidade",
+      "title_pt": "Política de privacidade",
+      "title_en": "Privacy policy",
+      "body_pt": "\n## 1. Quem trata seus dados\n\nA Ticket Rio Turismo, CNPJ 07.909.071/0001-50, com endereço de atendimento indicado no rodapé, é a responsável pelas decisões sobre os dados pessoais tratados nesta loja. Para dúvidas ou pedidos sobre privacidade, escreva para atendimento@ticketrio.com.br. Informe no assunto “Privacidade” e descreva seu pedido. Podemos solicitar informações proporcionais para confirmar sua identidade antes de responder.\n\nEsta política se aplica ao site ticketrioingressos.com.br, às contas de clientes, às consultas enviadas pelo site e, quando disponíveis, às etapas de pedido e entrega. A loja informa atualmente que as vendas online estão em preparação: montar um carrinho ou consultar um produto não cria reserva nem cobrança.\n\n## 2. Quais dados usamos\n\n- Navegação e segurança: endereço IP, data, horário, página acessada, dispositivo e registros técnicos gerados pela hospedagem e pelos serviços de autenticação.\n- Conta: e-mail, credenciais de acesso administradas pelo serviço de autenticação e informações de sessão. A Ticket Rio não exibe sua senha em texto aberto no painel.\n- Perfil: nome, sobrenome, telefone, país e, se você informar, tipo e número de documento. Solicitamos documento apenas quando necessário à reserva ou ao atendimento; não o inclua em mensagens livres sem necessidade.\n- Consulta: nome, e-mail da conta, telefone opcional, mensagem e produto consultado.\n- Carrinho e pedidos: itens selecionados, quantidades e, caso a venda seja ativada, dados necessários à confirmação, pagamento, entrega e suporte do pedido.\n- Preferências: idioma e escolha de cookies; eventos de navegação e campanha somente quando a ferramenta correspondente estiver configurada e você tiver dado o consentimento aplicável.\n\nOs dados são fornecidos por você ou gerados durante o uso do site. Uma mensagem de atendimento pode conter dados adicionais inseridos por você; evite enviar dados sensíveis que não sejam necessários.\n\n## 3. Para que usamos e em quais bases\n\nUsamos dados de conta, perfil, consulta e seleção para atender pedidos feitos por você, executar contrato ou procedimentos preliminares relacionados a ele. Mantemos registros necessários para cumprir obrigações legais e regulatórias, exercer direitos e prevenir fraude e abuso. Os registros técnicos estritamente necessários à segurança e ao funcionamento do site podem ser tratados com fundamento no legítimo interesse, observados seus direitos. Medição e publicidade opcionais dependem de sua escolha livre e específica no painel de cookies. Não usamos uma recusa de cookies opcionais para impedir o acesso ao catálogo.\n\nNão tomamos decisões exclusivamente automatizadas que produzam efeitos jurídicos ou semelhantes sobre você nesta loja. Caso uma futura etapa de pagamento ou reserva amplie o tratamento, este aviso deverá ser atualizado antes da ativação.\n\n## 4. Com quem podemos compartilhar\n\nPodemos compartilhar os dados estritamente necessários com provedores de hospedagem, autenticação e banco de dados (Vercel e MongoDB Atlas); prestadores envolvidos no atendimento, na emissão ou na entrega de um pedido efetivamente confirmado; e autoridades, quando houver obrigação legal. Ferramentas opcionais de medição e publicidade, quando configuradas, poderão envolver Google e Meta conforme suas escolhas no painel de cookies. Links para WhatsApp e Google Maps só abrem esses serviços quando você os aciona; a interação posterior segue as políticas deles.\n\nNão vendemos dados pessoais. Os fornecedores recebem apenas o necessário para a finalidade correspondente. Dados podem ser processados fora do Brasil por fornecedores de tecnologia; transferências internacionais devem observar a LGPD e as salvaguardas aplicáveis. Você pode pedir informações sobre destinatários e transferências pelo canal de privacidade.\n\n## 5. Por quanto tempo guardamos\n\nConservamos dados pelo tempo necessário à finalidade informada e, quando aplicável, aos prazos legais, regulatórios, de auditoria ou de defesa de direitos. Dados de conta e perfil permanecem enquanto a conta estiver ativa ou enquanto houver obrigação de conservação. Consultas e pedidos são mantidos pelo período necessário ao atendimento e às obrigações relacionadas. Registros técnicos seguem os prazos dos provedores e as necessidades de segurança. A escolha de cookies no navegador expira em até 12 meses; você pode alterá-la antes disso. Ao fim do prazo aplicável, eliminamos ou anonimizamos os dados, salvo hipótese legal de conservação.\n\n## 6. Seus direitos\n\nVocê pode solicitar confirmação do tratamento, acesso, correção, anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade, portabilidade quando aplicável, informação sobre compartilhamento, oposição nas hipóteses legais e revisão de decisões automatizadas, se houver. Pode revogar o consentimento e alterar cookies a qualquer momento em “Preferências de cookies” no rodapé, sem afetar o tratamento anterior à revogação. Solicitações de exclusão podem sofrer limitações legais de guarda. Se estiver no Espaço Econômico Europeu e o GDPR for aplicável, também poderá exercer os direitos previstos nessa legislação e apresentar reclamação à autoridade de controle competente. No Brasil, você poderá recorrer à ANPD quando cabível.\n\n## 7. Segurança, crianças e mudanças\n\nAplicamos controles técnicos e organizacionais proporcionais ao tratamento. Nenhuma transmissão pela internet é livre de risco; proteja suas credenciais e avise-nos se suspeitar de acesso indevido. Este site não se destina ao cadastro autônomo de crianças; responsáveis podem procurar o canal de privacidade para tratar dados de menores. Publicaremos alterações materiais nesta página com nova data de atualização.\n",
+      "body_en": "\n## 1. Controller and contact\n\nTicket Rio Turismo, Brazilian company registration (CNPJ) 07.909.071/0001-50, with its contact address shown in this site's footer, decides how personal data is processed in this store. For privacy questions or requests, email atendimento@ticketrio.com.br with “Privacy” in the subject. We may request proportionate information to verify your identity before responding.\n\nThis policy covers ticketrioingressos.com.br, customer accounts, enquiries sent through the site and, when available, order and delivery steps. Online sales are currently being prepared: adding an item to the cart or enquiring about a product does not create a booking or charge.\n\n## 2. Data we use\n\n- Browsing and security: IP address, time, page, device and technical records generated by hosting and authentication services.\n- Account: email, login credentials managed by the authentication provider and session information. Ticket Rio does not display your password in plain text in its admin panel.\n- Profile: name, phone, country and, if you provide it, document type and number. We request documents only when needed for a booking or service.\n- Enquiries: name, account email, optional phone, message and the product discussed.\n- Cart and orders: selected items and quantities and, if sales are enabled, information needed to confirm, pay for, deliver and support an order.\n- Preferences: language and cookie choices; browsing or campaign events only when the relevant tool is configured and you have given the applicable consent.\n\nData comes from you or is generated through your use of the site. Please avoid sending unnecessary sensitive information in free-text messages.\n\n## 3. Purposes and legal grounds\n\nWe use account, profile, enquiry and selection data to respond to your requests, perform a contract or take steps requested before a contract. We keep records where needed to meet legal duties, establish or defend legal claims and prevent fraud or abuse. Strictly necessary technical records may be processed for site security and operation on the basis of legitimate interests, subject to your rights. Optional measurement and advertising depend on your specific choice in the cookie panel. Refusing optional cookies does not block access to the catalogue.\n\nThis store does not make solely automated decisions with legal or similarly significant effects. This notice must be updated before a future payment or booking step expands processing.\n\n## 4. Recipients and international processing\n\nWe may share only the data needed with hosting, authentication and database providers (Vercel and MongoDB Atlas); providers involved in serving, issuing or delivering an actually confirmed order; and authorities where required by law. Optional measurement and advertising tools, when configured, may involve Google and Meta according to your choices. WhatsApp and Google Maps open only when you choose their links, and your subsequent use is governed by their policies.\n\nWe do not sell personal data. Technology providers may process data outside Brazil. International transfers must comply with applicable data protection law and safeguards. You may request information on recipients and transfers using the privacy contact above.\n\n## 5. Retention\n\nWe keep data for as long as necessary for the stated purposes and, where applicable, legal, regulatory, audit or legal-claim periods. Account and profile data remain while the account is active or a retention duty applies. Enquiries and orders are kept as needed for service and related duties. Technical logs follow provider periods and security needs. Your browser cookie choice expires within 12 months and can be changed sooner. Data is then deleted or anonymised unless law permits or requires retention.\n\n## 6. Your rights\n\nYou may request confirmation, access, correction, deletion or restriction where applicable, portability where provided by law, information about sharing, objection and review of automated decisions if any. You can withdraw consent at any time through “Cookie preferences” in the footer without affecting earlier lawful processing. Legal retention duties may limit deletion. If the GDPR applies to you, you may also exercise its rights and complain to a competent supervisory authority. In Brazil, you may contact the ANPD where applicable.\n\n## 7. Security, children and updates\n\nWe apply technical and organisational safeguards appropriate to the processing. No internet transmission is risk free; protect your credentials and contact us if you suspect unauthorised access. This site is not intended for children to register on their own. Guardians may contact us about a minor's data. Material changes will be published here with an updated date.\n",
+      "status": "published",
+      "approval_status": "pending",
+      "version": 3
+    },
+    {
+      "slug": "politica-de-cookies",
+      "title_pt": "Política de cookies",
+      "title_en": "Cookie policy",
+      "body_pt": "\n## 1. O que esta política cobre\n\nCookies e tecnologias semelhantes são pequenos registros usados pelo navegador. O site também utiliza armazenamento local e de sessão para manter funções solicitadas por você. Esta página descreve as categorias, finalidades e formas de controle. Ela complementa a Política de privacidade.\n\n## 2. Armazenamento necessário\n\n- Sessão de autenticação TicketRio: mantém o acesso à conta por cookie HttpOnly e protege operações autenticadas. A sessão expira em até sete dias e pode ser revogada antes disso.\n- ticket-rio-cart-v2: guarda itens e quantidades do carrinho no navegador até serem alterados, removidos ou limpos. Para usuários conectados, o carrinho também pode ser sincronizado ao banco.\n- ticket-rio-language: lembra o idioma escolhido até você alterá-lo ou limpar os dados do navegador.\n- ticket-rio-consent-v2: registra sua escolha sobre medição e publicidade por até 12 meses, salvo alteração ou limpeza antecipada.\n- Registro de evento de compra na sessão: evita duplicar um evento de medição após uma compra real; a função de pagamento ainda não está ativa.\n\nEsses recursos são necessários ao funcionamento solicitado ou à preservação da sua escolha e não dependem do aceite de cookies opcionais.\n\n## 3. Tecnologias opcionais\n\nMedição: quando configurada, ajuda a compreender o uso do site. Publicidade: quando configurada, mede campanhas e interações com anúncios. O Pixel da Meta depende da escolha “Publicidade”. O Google Tag Manager pode conter ferramentas de ambas as finalidades; por precaução, seu contêiner só é carregado se você aceitar “Medição” e “Publicidade”. Ferramentas não configuradas não são carregadas. Os provedores podem definir seus próprios cookies ou identificadores quando autorizados.\n\nNenhuma categoria opcional vem pré-selecionada. Rejeitar não impede navegar na loja. O botão “Personalizar” permite escolher cada categoria antes de salvar. O conteúdo do Google Tag Manager deve ser revisto antes de qualquer futura ativação para que corresponda às finalidades informadas aqui.\n\n## 4. Como mudar sua escolha\n\nUse “Preferências de cookies” no rodapé para revisar, aceitar ou rejeitar as categorias opcionais. Ao retirar uma autorização, a página é recarregada para interromper scripts já carregados. A retirada não apaga automaticamente cookies de terceiros já gravados; você pode removê-los nas configurações do navegador. Também é possível bloquear armazenamento pelo navegador, mas isso pode prejudicar conta, idioma e carrinho.\n\nLinks para WhatsApp e Google Maps são acionados somente por você e passam a seguir as políticas próprias desses serviços. Para exercer direitos sobre dados pessoais, consulte a Política de privacidade ou escreva para atendimento@ticketrio.com.br.\n",
+      "body_en": "\n## 1. Scope\n\nCookies and similar technologies are small browser records. This site also uses local and session storage for functions you request. This page describes their purposes and controls and supplements the Privacy policy.\n\n## 2. Necessary storage\n\n- TicketRio authentication session: maintains your account access through an HttpOnly cookie and protects authenticated actions. Sessions expire within seven days and can be revoked earlier.\n- ticket-rio-cart-v2: stores cart items and quantities until changed, removed or cleared. Signed-in carts may also be synchronised with the database.\n- ticket-rio-language: remembers your language until changed or browser data is cleared.\n- ticket-rio-consent-v2: stores measurement and advertising choices for up to 12 months unless changed or cleared sooner.\n- Session purchase-event record: prevents duplicate measurement after a real purchase; online payment is not yet active.\n\nThese functions are necessary for the service or to remember your choice and do not depend on optional cookie consent.\n\n## 3. Optional technologies\n\nMeasurement, when configured, helps us understand site use. Advertising, when configured, measures campaigns and ad interactions. The Meta Pixel requires the “Advertising” choice. A Google Tag Manager container may contain tools for both purposes and is loaded only if you choose both “Measurement” and “Advertising”. Tools that are not configured are not loaded. Authorised providers may set their own cookies or identifiers.\n\nOptional categories are off by default. Refusal does not block the store. “Customize” lets you choose each category before saving. Any future Google Tag Manager container must be reviewed so its tags match the purposes described here.\n\n## 4. Changing your choice\n\nUse “Cookie preferences” in the footer to review, accept or reject optional categories. If you withdraw a choice, the page reloads to stop already loaded scripts. Withdrawal does not automatically delete third-party cookies already stored; you can clear those in your browser. Blocking all browser storage may affect your account, language and cart.\n\nWhatsApp and Google Maps links are opened only by your action and then follow their own policies. For personal-data requests, see the Privacy policy or email atendimento@ticketrio.com.br.\n",
+      "status": "published",
+      "approval_status": "pending",
+      "version": 2
+    },
+    {
+      "slug": "termos-de-uso",
+      "title_pt": "Termos de uso",
+      "title_en": "Terms of use",
+      "body_pt": "\n## 1. Uso do site\n\nEstes termos regulam a navegação em ticketrioingressos.com.br e o uso de conta, catálogo, carrinho e canais de consulta. Ao utilizar o site, você se compromete a fornecer informações verdadeiras e a não praticar fraude, abuso, acesso indevido ou uso que prejudique outros usuários. Os Termos de compra e a Política de privacidade complementam este documento.\n\n## 2. Informações e disponibilidade\n\nO catálogo apresenta ingressos e experiências do Rio de Janeiro. Fotos podem ser ilustrativas; preço, data, setor, inclusões, disponibilidade e condições específicas dependem da descrição atual do produto e da confirmação da operação. Produtos sob consulta não constituem oferta final ou reserva. As vendas online estão em preparação; navegar, criar conta, montar carrinho ou enviar consulta não gera cobrança ou ingresso.\n\nPodemos corrigir erros materiais e atualizar informações, respeitando direitos já constituídos. Não publicamos confirmação de pedido ou ingresso oficial sem a etapa operacional correspondente. Os conteúdos do site não substituem as regras dos organizadores, fornecedores ou autoridades aplicáveis a cada evento ou experiência.\n\n## 3. Conta e propriedade intelectual\n\nVocê é responsável por proteger o acesso à sua conta e informar suspeita de uso indevido. Podemos restringir acesso em caso de fraude ou violação destes termos, observada a legislação aplicável. Marca, layout, textos e demais conteúdos da Ticket Rio ou de seus licenciantes não podem ser reproduzidos comercialmente sem autorização. Links externos, como WhatsApp e Google Maps, seguem termos próprios de seus operadores.\n\n## 4. Responsabilidade e contato\n\nNão excluímos direitos garantidos ao consumidor nem responsabilidades que a lei não permita limitar. Para dúvidas, correções e reclamações, contate atendimento@ticketrio.com.br. Aplica-se a legislação brasileira, preservadas regras imperativas de proteção ao consumidor e de dados pessoais que sejam aplicáveis ao seu caso. Alterações destes termos serão publicadas nesta página.\n",
+      "body_en": "\n## 1. Site use\n\nThese terms govern browsing ticketrioingressos.com.br and using an account, catalogue, cart or enquiry channel. You agree to provide accurate information and not to engage in fraud, abuse, unauthorised access or conduct that harms other users. The Purchase terms and Privacy policy supplement these terms.\n\n## 2. Information and availability\n\nThe catalogue displays Rio de Janeiro tickets and experiences. Photos may be illustrative; prices, dates, sectors, inclusions, availability and specific conditions depend on the current product description and operational confirmation. Enquiry-only products are not a final offer or booking. Online sales are being prepared: browsing, registering, creating a cart or sending an enquiry does not create a charge or ticket.\n\nWe may correct material errors and update information while respecting rights already acquired. We do not issue order confirmations or official tickets without the corresponding operational step. Site content does not replace rules set by organisers, suppliers or authorities for each event or experience.\n\n## 3. Accounts and intellectual property\n\nProtect your account access and tell us if you suspect misuse. We may restrict access in cases of fraud or breach of these terms, subject to applicable law. Ticket Rio's or its licensors' brands, layout, text and other content may not be commercially reproduced without permission. External links, including WhatsApp and Google Maps, are subject to their operators' terms.\n\n## 4. Liability and contact\n\nNothing here excludes mandatory consumer rights or liability that cannot legally be limited. For questions, corrections or complaints, email atendimento@ticketrio.com.br. Brazilian law applies, without prejudice to mandatory consumer and privacy rules applicable to your case. Changes to these terms will be published here.\n",
+      "status": "published",
+      "approval_status": "pending",
+      "version": 2
+    },
+    {
+      "slug": "termos-de-compra",
+      "title_pt": "Termos de compra",
+      "title_en": "Purchase terms",
+      "body_pt": "\n## 1. Situação atual da loja\n\nA venda e o pagamento online ainda estão em preparação. Os produtos publicados podem estar sob consulta, sem estoque ou indisponíveis para compra imediata. Adicionar ao carrinho, visualizar um valor de referência ou enviar uma consulta não confirma preço, disponibilidade, reserva, pedido ou pagamento. Nenhuma cobrança é realizada pelo site nesta etapa.\n\n## 2. Antes de contratar\n\nQuando a venda for habilitada, a página do produto e o resumo anterior à confirmação deverão apresentar, conforme o caso, fornecedor, data, horário, local, setor, quantidade, inclusões, restrições de acesso, preço total, taxas, meio de pagamento, forma e prazo de entrega e regras de cancelamento. Verifique todos esses dados antes de aceitar. Condições específicas válidas para cada produto serão mostradas antes de uma compra real; não substituem direitos previstos em lei.\n\nUma consulta respondida pela equipe poderá exigir proposta e confirmação próprias. Um pedido só existirá após confirmação expressa nos canais de venda habilitados. Um comprovante de pagamento não é, por si só, um ingresso oficial. A forma de emissão e o documento de acesso serão informados no produto ou na confirmação do pedido.\n\n## 3. Pagamento, entrega e suporte\n\nQuando houver integração de pagamento, os meios disponíveis e qualquer parcelamento serão exibidos antes da confirmação. A aprovação poderá depender do prestador de pagamento e de verificações antifraude proporcionais. A entrega digital, retirada ou instrução de acesso dependerá do produto e será comunicada antes da contratação. Não informe dados de cartão por chat, e-mail ou formulário de consulta. Para problemas com pedido efetivamente confirmado, escreva para atendimento@ticketrio.com.br com o número do pedido; não inclua senha ou dados completos de pagamento.\n\n## 4. Cancelamento e direitos\n\nPedidos reais observarão a página “Cancelamento e reembolso”, as condições específicas informadas antes da compra e os direitos obrigatórios do consumidor, inclusive o direito de arrependimento quando aplicável. Nenhum texto do site afasta garantias legais. Alterações relevantes de evento, serviço ou disponibilidade serão comunicadas pelos canais vinculados ao pedido quando houver uma contratação efetiva.\n",
+      "body_en": "\n## 1. Current store status\n\nOnline sales and payment are still being prepared. Published products may be enquiry-only, out of stock or unavailable for immediate purchase. Adding an item to the cart, viewing an indicative amount or sending an enquiry does not confirm a price, availability, booking, order or payment. The site does not currently charge you.\n\n## 2. Before contracting\n\nWhen online sales are enabled, the product page and pre-confirmation summary should show, as relevant, supplier, date, time, venue, sector, quantity, inclusions, access restrictions, total price, fees, payment method, delivery method and time, and cancellation rules. Check these details before accepting. Product-specific conditions will be presented before a real purchase and do not override statutory rights.\n\nAn enquiry answered by our team may require a separate proposal and confirmation. An order exists only after express confirmation through an enabled sales channel. A payment receipt is not itself an official ticket. The issue and access method will be described on the product or in the order confirmation.\n\n## 3. Payment, delivery and support\n\nOnce a payment integration exists, available payment methods and instalments will be shown before confirmation. Approval may depend on the payment provider and proportionate fraud checks. Digital delivery, collection or access instructions depend on the product and will be communicated before contracting. Do not send card details through chat, email or an enquiry form. For a confirmed order, email atendimento@ticketrio.com.br with the order number; do not include passwords or full payment details.\n\n## 4. Cancellation and rights\n\nReal orders will be subject to the “Cancellation and refunds” page, product-specific conditions disclosed before purchase and mandatory consumer rights, including withdrawal rights where applicable. Nothing on this site removes statutory guarantees. Relevant event, service or availability changes will be communicated through channels linked to an actual order.\n",
+      "status": "published",
+      "approval_status": "pending",
+      "version": 3
+    },
+    {
+      "slug": "cancelamento-e-reembolso",
+      "title_pt": "Cancelamento e reembolso",
+      "title_en": "Cancellation and refunds",
+      "body_pt": "\n## 1. Situação atual\n\nO site ainda não realiza cobranças nem confirma reservas online. Portanto, selecionar um produto ou montar um carrinho não exige cancelamento nem gera reembolso. Se você contratou por outro canal da Ticket Rio, informe o número do pedido e o canal de compra ao solicitar atendimento.\n\n## 2. Como pedir cancelamento\n\nEscreva para atendimento@ticketrio.com.br e informe nome, e-mail usado na contratação, produto, data e número do pedido, se houver. Não envie senha, dados completos de cartão ou documentos desnecessários. A equipe verificará o fornecedor, a etapa de emissão, as condições informadas antes da compra e seus direitos legais, e responderá pelo canal apropriado.\n\n## 3. Arrependimento e outras hipóteses\n\nEm contratações realizadas fora do estabelecimento comercial, o Código de Defesa do Consumidor prevê o direito de arrependimento no prazo legal de 7 dias, observado o caso concreto e a legislação aplicável. Condições de fornecedores não podem afastar direitos obrigatórios. Em caso de cancelamento do evento ou alteração relevante do serviço, serão oferecidas as soluções exigidas pela legislação e pelas condições válidas da contratação. Pedidos fora do direito legal de arrependimento serão avaliados conforme as condições específicas apresentadas antes da compra, sem prejuízo de outros direitos do consumidor.\n\n## 4. Reembolso\n\nQuando devido, o reembolso seguirá o meio de pagamento e o procedimento informado na resposta ao pedido. O prazo de crédito final pode depender da instituição financeira ou operadora do pagamento. Taxas, devolução integral ou parcial e eventuais alternativas serão esclarecidas conforme a situação concreta e os direitos aplicáveis; não há uma regra genérica que substitua as condições da contratação.\n\n## 5. Dados e contato\n\nUsamos as informações do pedido de cancelamento para localizar a contratação, verificar direitos e responder. Consulte a Política de privacidade para detalhes e direitos sobre seus dados. Para dúvidas ou reclamações, utilize atendimento@ticketrio.com.br.\n",
+      "body_en": "\n## 1. Current status\n\nThe site does not currently charge customers or confirm online bookings. Selecting a product or building a cart therefore requires no cancellation or refund. If you contracted through another Ticket Rio channel, include your order number and sales channel when contacting us.\n\n## 2. How to request cancellation\n\nEmail atendimento@ticketrio.com.br with your name, contracting email, product, date and order number if available. Do not send passwords, full card details or unnecessary documents. The team will review the supplier, issue status, terms disclosed before purchase and your statutory rights, then respond through an appropriate channel.\n\n## 3. Withdrawal and other situations\n\nFor contracts concluded outside business premises, Brazil's Consumer Protection Code provides a statutory seven-day withdrawal right, subject to the facts and applicable law. Supplier terms cannot remove mandatory rights. If an event is cancelled or a service is materially changed, the remedies required by applicable law and valid contract terms will be offered. Requests outside a statutory withdrawal right are considered under the specific terms shown before purchase, without prejudice to other consumer rights.\n\n## 4. Refunds\n\nWhere a refund is due, it will follow the payment method and procedure explained in the response to your request. Final credit timing may depend on the financial institution or payment provider. Fees, full or partial refunds and alternatives will be explained based on the circumstances and applicable rights; no general rule replaces the terms of the actual transaction.\n\n## 5. Data and contact\n\nWe use cancellation-request information to locate the transaction, assess rights and respond. See the Privacy policy for details and data rights. For questions or complaints, email atendimento@ticketrio.com.br.\n",
+      "status": "published",
+      "approval_status": "pending",
+      "version": 3
+    }
+  ],
+  "home_blocks": [
+    {
+      "block_key": "categories",
+      "visible": true,
+      "sort_order": 1
+    },
+    {
+      "block_key": "featured",
+      "visible": true,
+      "sort_order": 2
+    },
+    {
+      "block_key": "calendar",
+      "visible": true,
+      "sort_order": 3
+    },
+    {
+      "block_key": "tours",
+      "visible": true,
+      "sort_order": 4
+    },
+    {
+      "block_key": "transfers",
+      "visible": true,
+      "sort_order": 5
+    },
+    {
+      "block_key": "benefits",
+      "visible": true,
+      "sort_order": 6
+    },
+    {
+      "block_key": "faq",
+      "visible": true,
+      "sort_order": 7
+    }
+  ],
+  "support_agents": [
+    {
+      "agent_key": "tickets",
+      "name": "Especialista em ingressos e desfiles",
+      "queue_role": "commercial",
+      "scope": "Ingressos, setores, escolas, datas, preços e ensaios técnicos.",
+      "guardrails": "Usar apenas informações publicadas e disponibilidade confirmada; não prometer ingresso, setor ou preço sem confirmação."
+    },
+    {
+      "agent_key": "lounges",
+      "name": "Especialista em camarotes",
+      "queue_role": "commercial",
+      "scope": "Camarotes, pacotes, inclusões e acesso.",
+      "guardrails": "Não inventar serviços inclusos ou disponibilidade; encaminhar logística de acesso à operação."
+    },
+    {
+      "agent_key": "mobility",
+      "name": "Especialista em mobilidade",
+      "queue_role": "operations",
+      "scope": "Transfers, embarque, retorno e metrô.",
+      "guardrails": "Confirmar rota, data e ponto de encontro antes de orientar; não alterar reserva sem registro."
+    },
+    {
+      "agent_key": "citytour",
+      "name": "Especialista Rio City Tour",
+      "queue_role": "commercial",
+      "scope": "Escolha de passeios, roteiros e inclusões.",
+      "guardrails": "Usar descrição publicada; não prometer operador, horário ou disponibilidade sem confirmação."
+    },
+    {
+      "agent_key": "tour_operations",
+      "name": "Especialista em operação dos passeios",
+      "queue_role": "operations",
+      "scope": "Agenda, encontro e execução dos passeios.",
+      "guardrails": "Conferir produto e data; escalar divergência com fornecedor a uma pessoa."
+    },
+    {
+      "agent_key": "shop",
+      "name": "Especialista em produtos da loja",
+      "queue_role": "commercial",
+      "scope": "Camisetas, tamanhos e demais produtos físicos.",
+      "guardrails": "Não confirmar estoque, envio ou prazo sem consulta aos dados operacionais."
+    },
+    {
+      "agent_key": "payments",
+      "name": "Especialista em compras e pagamentos",
+      "queue_role": "finance",
+      "scope": "Checkout, cartão, parcelas, Pix e boleto.",
+      "guardrails": "Nunca solicitar número completo do cartão, CVV, senha ou código de autenticação; não afirmar pagamento aprovado sem confirmação do prestador."
+    },
+    {
+      "agent_key": "orders",
+      "name": "Especialista em pedidos e entrega",
+      "queue_role": "operations",
+      "scope": "Status do pedido, dados do passageiro e acesso ao ingresso oficial.",
+      "guardrails": "Verificar status real antes de responder; não emitir ou prometer ingresso fora do fluxo oficial."
+    },
+    {
+      "agent_key": "refunds",
+      "name": "Especialista em trocas e reembolsos",
+      "queue_role": "finance",
+      "scope": "Cancelamentos, remarcações e devoluções.",
+      "guardrails": "Aplicar termos vigentes e regras do produto; não prometer valor ou prazo de reembolso antes da análise humana."
+    },
+    {
+      "agent_key": "accounts",
+      "name": "Especialista em conta e site",
+      "queue_role": "operations",
+      "scope": "Acesso à conta, carrinho e problemas técnicos.",
+      "guardrails": "Nunca pedir senha, token ou código de acesso; orientar recuperação pelo fluxo oficial."
+    },
+    {
+      "agent_key": "privacy",
+      "name": "Especialista em privacidade",
+      "queue_role": "administrator",
+      "scope": "Dados pessoais, LGPD e solicitações do titular.",
+      "guardrails": "Não divulgar dados por chat sem verificação de identidade; encaminhar solicitações formais ao canal de privacidade."
+    },
+    {
+      "agent_key": "triage",
+      "name": "Especialista em triagem",
+      "queue_role": "commercial",
+      "scope": "Assuntos gerais ou dúvidas não classificadas.",
+      "guardrails": "Identificar a demanda e encaminhar à fila correta; não inventar resposta nem concluir solicitação sem confirmação."
+    }
+  ],
+  "support_topics": [
+    {
+      "id": "ticket_sector",
+      "category_key": "tickets",
+      "category_pt": "Ingressos e desfiles",
+      "category_en": "Tickets and parades",
+      "title_pt": "Setores e visibilidade",
+      "title_en": "Sections and views",
+      "example_pt": "Qual setor combina com a minha experiência?",
+      "example_en": "Which section suits my visit?",
+      "agent_key": "tickets",
+      "sort_order": 10
+    },
+    {
+      "id": "parade_schedule",
+      "category_key": "tickets",
+      "category_pt": "Ingressos e desfiles",
+      "category_en": "Tickets and parades",
+      "title_pt": "Datas, escolas e ordem dos desfiles",
+      "title_en": "Dates, schools and parade order",
+      "example_pt": "Em que dia desfila a escola que quero ver?",
+      "example_en": "When will the school I want to see parade?",
+      "agent_key": "tickets",
+      "sort_order": 20
+    },
+    {
+      "id": "ticket_prices",
+      "category_key": "tickets",
+      "category_pt": "Ingressos e desfiles",
+      "category_en": "Tickets and parades",
+      "title_pt": "Valores e tipos de ingresso",
+      "title_en": "Prices and ticket types",
+      "example_pt": "Quais são os valores e opções de ingresso?",
+      "example_en": "What ticket types and prices are available?",
+      "agent_key": "tickets",
+      "sort_order": 30
+    },
+    {
+      "id": "ticket_availability",
+      "category_key": "tickets",
+      "category_pt": "Ingressos e desfiles",
+      "category_en": "Tickets and parades",
+      "title_pt": "Disponibilidade e reserva",
+      "title_en": "Availability and booking",
+      "example_pt": "Há ingressos disponíveis para a data que escolhi?",
+      "example_en": "Are tickets available for my chosen date?",
+      "agent_key": "tickets",
+      "sort_order": 40
+    },
+    {
+      "id": "technical_rehearsal",
+      "category_key": "tickets",
+      "category_pt": "Ingressos e desfiles",
+      "category_en": "Tickets and parades",
+      "title_pt": "Ensaio Técnico",
+      "title_en": "Technical Rehearsal",
+      "example_pt": "Como funcionam os ingressos para o Ensaio Técnico?",
+      "example_en": "How do Technical Rehearsal tickets work?",
+      "agent_key": "tickets",
+      "sort_order": 50
+    },
+    {
+      "id": "ticket_accessibility",
+      "category_key": "tickets",
+      "category_pt": "Ingressos e desfiles",
+      "category_en": "Tickets and parades",
+      "title_pt": "Acessibilidade no Sambódromo",
+      "title_en": "Accessibility at the Sambadrome",
+      "example_pt": "Quais opções de acessibilidade estão disponíveis?",
+      "example_en": "What accessibility options are available?",
+      "agent_key": "mobility",
+      "sort_order": 60
+    },
+    {
+      "id": "lounge_options",
+      "category_key": "lounges",
+      "category_pt": "Camarotes",
+      "category_en": "VIP lounges",
+      "title_pt": "Opções de camarote",
+      "title_en": "Lounge options",
+      "example_pt": "Qual camarote combina com o que procuro?",
+      "example_en": "Which lounge suits what I need?",
+      "agent_key": "lounges",
+      "sort_order": 70
+    },
+    {
+      "id": "lounge_inclusions",
+      "category_key": "lounges",
+      "category_pt": "Camarotes",
+      "category_en": "VIP lounges",
+      "title_pt": "O que está incluído",
+      "title_en": "What is included",
+      "example_pt": "O que o meu camarote inclui?",
+      "example_en": "What does my lounge package include?",
+      "agent_key": "lounges",
+      "sort_order": 80
+    },
+    {
+      "id": "lounge_access",
+      "category_key": "lounges",
+      "category_pt": "Camarotes",
+      "category_en": "VIP lounges",
+      "title_pt": "Localização e acesso",
+      "title_en": "Location and access",
+      "example_pt": "Como chego ao camarote no dia do evento?",
+      "example_en": "How do I reach the lounge on event day?",
+      "agent_key": "mobility",
+      "sort_order": 90
+    },
+    {
+      "id": "transfer_routes",
+      "category_key": "mobility",
+      "category_pt": "Transfers e metrô",
+      "category_en": "Transfers and metro",
+      "title_pt": "Rotas de transfer",
+      "title_en": "Transfer routes",
+      "example_pt": "Qual rota atende meu hotel ou região?",
+      "example_en": "Which route serves my hotel or area?",
+      "agent_key": "mobility",
+      "sort_order": 100
+    },
+    {
+      "id": "transfer_boarding",
+      "category_key": "mobility",
+      "category_pt": "Transfers e metrô",
+      "category_en": "Transfers and metro",
+      "title_pt": "Embarque e horário",
+      "title_en": "Boarding and timing",
+      "example_pt": "Onde e quando devo embarcar?",
+      "example_en": "Where and when should I board?",
+      "agent_key": "mobility",
+      "sort_order": 110
+    },
+    {
+      "id": "transfer_return",
+      "category_key": "mobility",
+      "category_pt": "Transfers e metrô",
+      "category_en": "Transfers and metro",
+      "title_pt": "Retorno e alterações",
+      "title_en": "Return and changes",
+      "example_pt": "Como funciona a volta depois do desfile?",
+      "example_en": "How does the return trip work?",
+      "agent_key": "mobility",
+      "sort_order": 120
+    },
+    {
+      "id": "metro_access",
+      "category_key": "mobility",
+      "category_pt": "Transfers e metrô",
+      "category_en": "Transfers and metro",
+      "title_pt": "Metrô e acesso ao Sambódromo",
+      "title_en": "Metro and Sambadrome access",
+      "example_pt": "Qual estação ou bilhete de metrô devo usar?",
+      "example_en": "Which metro station or pass should I use?",
+      "agent_key": "mobility",
+      "sort_order": 130
+    },
+    {
+      "id": "tour_choice",
+      "category_key": "tours",
+      "category_pt": "Rio City Tour",
+      "category_en": "Rio City Tour",
+      "title_pt": "Escolher um passeio",
+      "title_en": "Choose a tour",
+      "example_pt": "Qual passeio é melhor para mim?",
+      "example_en": "Which tour is right for me?",
+      "agent_key": "citytour",
+      "sort_order": 140
+    },
+    {
+      "id": "tour_inclusions",
+      "category_key": "tours",
+      "category_pt": "Rio City Tour",
+      "category_en": "Rio City Tour",
+      "title_pt": "Roteiro e inclusões",
+      "title_en": "Itinerary and inclusions",
+      "example_pt": "O que está incluído no passeio?",
+      "example_en": "What is included in the tour?",
+      "agent_key": "citytour",
+      "sort_order": 150
+    },
+    {
+      "id": "tour_schedule",
+      "category_key": "tours",
+      "category_pt": "Rio City Tour",
+      "category_en": "Rio City Tour",
+      "title_pt": "Datas e disponibilidade",
+      "title_en": "Dates and availability",
+      "example_pt": "Há vagas para a data desejada?",
+      "example_en": "Is my preferred date available?",
+      "agent_key": "tour_operations",
+      "sort_order": 160
+    },
+    {
+      "id": "tour_meeting",
+      "category_key": "tours",
+      "category_pt": "Rio City Tour",
+      "category_en": "Rio City Tour",
+      "title_pt": "Ponto de encontro e horários",
+      "title_en": "Meeting point and times",
+      "example_pt": "Onde começa o passeio?",
+      "example_en": "Where does the tour start?",
+      "agent_key": "tour_operations",
+      "sort_order": 170
+    },
+    {
+      "id": "apparel_product",
+      "category_key": "shop",
+      "category_pt": "Produtos da loja",
+      "category_en": "Store products",
+      "title_pt": "Camisetas e outros produtos",
+      "title_en": "T-shirts and other products",
+      "example_pt": "Quais produtos estão disponíveis?",
+      "example_en": "Which products are available?",
+      "agent_key": "shop",
+      "sort_order": 180
+    },
+    {
+      "id": "apparel_size",
+      "category_key": "shop",
+      "category_pt": "Produtos da loja",
+      "category_en": "Store products",
+      "title_pt": "Tamanhos e entrega",
+      "title_en": "Sizes and delivery",
+      "example_pt": "Como escolho o tamanho e recebo o produto?",
+      "example_en": "How do I choose a size and receive the item?",
+      "agent_key": "shop",
+      "sort_order": 190
+    },
+    {
+      "id": "checkout_how",
+      "category_key": "payments",
+      "category_pt": "Compra e pagamento",
+      "category_en": "Purchase and payment",
+      "title_pt": "Como comprar pelo site",
+      "title_en": "How to buy online",
+      "example_pt": "Como finalizo minha compra?",
+      "example_en": "How do I complete my purchase?",
+      "agent_key": "payments",
+      "sort_order": 200
+    },
+    {
+      "id": "credit_installments",
+      "category_key": "payments",
+      "category_pt": "Compra e pagamento",
+      "category_en": "Purchase and payment",
+      "title_pt": "Cartão e parcelamento",
+      "title_en": "Card and installments",
+      "example_pt": "Posso parcelar no cartão?",
+      "example_en": "Can I pay in installments?",
+      "agent_key": "payments",
+      "sort_order": 210
+    },
+    {
+      "id": "pix_boleto",
+      "category_key": "payments",
+      "category_pt": "Compra e pagamento",
+      "category_en": "Purchase and payment",
+      "title_pt": "Pix e boleto",
+      "title_en": "Pix and bank slip",
+      "example_pt": "Como pago com Pix ou boleto?",
+      "example_en": "How can I pay with Pix or bank slip?",
+      "agent_key": "payments",
+      "sort_order": 220
+    },
+    {
+      "id": "payment_problem",
+      "category_key": "payments",
+      "category_pt": "Compra e pagamento",
+      "category_en": "Purchase and payment",
+      "title_pt": "Falha ou dúvida na cobrança",
+      "title_en": "Payment problem or charge",
+      "example_pt": "O pagamento não abriu ou apareceu uma cobrança inesperada.",
+      "example_en": "Payment did not open or I see an unexpected charge.",
+      "agent_key": "payments",
+      "sort_order": 230
+    },
+    {
+      "id": "order_status",
+      "category_key": "orders",
+      "category_pt": "Pedido e ingresso",
+      "category_en": "Order and ticket",
+      "title_pt": "Status do pedido",
+      "title_en": "Order status",
+      "example_pt": "Qual é a situação do meu pedido?",
+      "example_en": "What is my order status?",
+      "agent_key": "orders",
+      "sort_order": 240
+    },
+    {
+      "id": "ticket_delivery",
+      "category_key": "orders",
+      "category_pt": "Pedido e ingresso",
+      "category_en": "Order and ticket",
+      "title_pt": "Entrega do ingresso oficial",
+      "title_en": "Official ticket delivery",
+      "example_pt": "Quando e como recebo meu ingresso?",
+      "example_en": "When and how will I receive my ticket?",
+      "agent_key": "orders",
+      "sort_order": 250
+    },
+    {
+      "id": "passenger_details",
+      "category_key": "orders",
+      "category_pt": "Pedido e ingresso",
+      "category_en": "Order and ticket",
+      "title_pt": "Dados dos participantes",
+      "title_en": "Guest details",
+      "example_pt": "Preciso corrigir dados de um participante.",
+      "example_en": "I need to correct a guest detail.",
+      "agent_key": "orders",
+      "sort_order": 260
+    },
+    {
+      "id": "change_reschedule",
+      "category_key": "policies",
+      "category_pt": "Trocas e reembolsos",
+      "category_en": "Changes and refunds",
+      "title_pt": "Troca ou remarcação",
+      "title_en": "Change or reschedule",
+      "example_pt": "Posso alterar a data ou o produto?",
+      "example_en": "Can I change the date or product?",
+      "agent_key": "refunds",
+      "sort_order": 270
+    },
+    {
+      "id": "cancel_refund",
+      "category_key": "policies",
+      "category_pt": "Trocas e reembolsos",
+      "category_en": "Changes and refunds",
+      "title_pt": "Cancelamento e reembolso",
+      "title_en": "Cancellation and refund",
+      "example_pt": "Como solicito o cancelamento?",
+      "example_en": "How do I request cancellation?",
+      "agent_key": "refunds",
+      "sort_order": 280
+    },
+    {
+      "id": "refund_status",
+      "category_key": "policies",
+      "category_pt": "Trocas e reembolsos",
+      "category_en": "Changes and refunds",
+      "title_pt": "Acompanhar reembolso",
+      "title_en": "Refund status",
+      "example_pt": "Em que etapa está meu reembolso?",
+      "example_en": "What is the status of my refund?",
+      "agent_key": "refunds",
+      "sort_order": 290
+    },
+    {
+      "id": "account_login",
+      "category_key": "site",
+      "category_pt": "Conta e funcionamento do site",
+      "category_en": "Account and website",
+      "title_pt": "Acesso à conta",
+      "title_en": "Account access",
+      "example_pt": "Não consigo entrar na minha conta.",
+      "example_en": "I cannot sign in to my account.",
+      "agent_key": "accounts",
+      "sort_order": 300
+    },
+    {
+      "id": "cart_problem",
+      "category_key": "site",
+      "category_pt": "Conta e funcionamento do site",
+      "category_en": "Account and website",
+      "title_pt": "Carrinho ou erro no site",
+      "title_en": "Cart or website error",
+      "example_pt": "Meu carrinho ou uma página não funciona.",
+      "example_en": "My cart or a page is not working.",
+      "agent_key": "accounts",
+      "sort_order": 310
+    },
+    {
+      "id": "privacy_data",
+      "category_key": "site",
+      "category_pt": "Conta e funcionamento do site",
+      "category_en": "Account and website",
+      "title_pt": "Privacidade e meus dados",
+      "title_en": "Privacy and my data",
+      "example_pt": "Quero saber como meus dados são tratados.",
+      "example_en": "I want to know how my data is handled.",
+      "agent_key": "privacy",
+      "sort_order": 320
+    },
+    {
+      "id": "other_question",
+      "category_key": "other",
+      "category_pt": "Outro assunto",
+      "category_en": "Something else",
+      "title_pt": "Outra dúvida",
+      "title_en": "Another question",
+      "example_pt": "Minha dúvida não aparece nas opções.",
+      "example_en": "My question is not listed.",
+      "agent_key": "triage",
+      "sort_order": 330
+    }
+  ]
+}

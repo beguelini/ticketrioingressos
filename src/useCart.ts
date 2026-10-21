@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { supabase, type CartLine } from './store'
+import { api, type CartLine } from './store'
 
 const storageKey = 'ticket-rio-cart-v2'
 
@@ -26,10 +26,10 @@ export function useCart(userId: string | null) {
     previousUser.current = userId
   }, [userId])
   useEffect(() => {
-    if (!userId || !supabase) return
+    if (!userId || !api) return
     let cancelled = false
     const reconcile = async () => {
-      const client = supabase
+      const client = api
       if (!client) return
       await client.from('shopping_carts').upsert({ user_id: userId })
       const { data } = await client.from('cart_items').select('variant_id,quantity').eq('user_id', userId)
@@ -54,21 +54,21 @@ export function useCart(userId: string | null) {
         ...selection,
       } : line)
       : [...current, { variant_id: variantId, quantity, ...selection }]
-    if (userId && supabase) void supabase.from('cart_items').upsert({ user_id: userId, variant_id: variantId, quantity: next.find((line) => line.variant_id === variantId)?.quantity ?? quantity })
+    if (userId && api) void api.from('cart_items').upsert({ user_id: userId, variant_id: variantId, quantity: next.find((line) => line.variant_id === variantId)?.quantity ?? quantity })
     return next
   })
   const setQuantity = (variantId: string, quantity: number) => {
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) return
     setLines((current) => current.map((line) => line.variant_id === variantId ? { ...line, quantity } : line))
-    if (userId && supabase) void supabase.from('cart_items').upsert({ user_id: userId, variant_id: variantId, quantity })
+    if (userId && api) void api.from('cart_items').upsert({ user_id: userId, variant_id: variantId, quantity })
   }
   const remove = (variantId: string) => {
     setLines((current) => current.filter((line) => line.variant_id !== variantId))
-    if (userId && supabase) void supabase.from('cart_items').delete().eq('user_id', userId).eq('variant_id', variantId)
+    if (userId && api) void api.from('cart_items').delete().eq('user_id', userId).eq('variant_id', variantId)
   }
   const clear = () => {
     setLines([])
-    if (userId && supabase) void supabase.from('cart_items').delete().eq('user_id', userId)
+    if (userId && api) void api.from('cart_items').delete().eq('user_id', userId)
   }
   return { lines, add, setQuantity, remove, clear, count: lines.reduce((sum, line) => sum + line.quantity, 0) }
 }

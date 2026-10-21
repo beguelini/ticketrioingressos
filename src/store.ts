@@ -1,4 +1,5 @@
-import { createClient, type User } from '@supabase/supabase-js'
+import { api, type User } from './client'
+export { api } from './client'
 
 export type ProductKind = 'ticket' | 'transfer' | 'tour' | 'metro' | 'apparel' | 'package'
 export type Product = {
@@ -56,9 +57,6 @@ export const referenceInstitution: Institution = {
   hours: 'Segunda a sexta, 10h às 18h', confirmed: false,
 }
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-export const supabase = url && key ? createClient(url, key) : null
 export const money = (cents: number, currency = 'BRL', language: Language = 'pt') =>
   new Intl.NumberFormat(language === 'pt' ? 'pt-BR' : 'en-US', { style: 'currency', currency }).format(cents / 100)
 
@@ -73,8 +71,8 @@ export const categories: { kind: ProductKind; pt: string; en: string; image: str
 ]
 
 export async function fetchCatalog(): Promise<CatalogProduct[]> {
-  if (!supabase) throw new Error('Supabase não configurado')
-  const { data, error } = await supabase
+  if (!api) throw new Error('Serviço indisponível')
+  const { data, error } = await api
     .from('store_products')
     .select('*,product_variants(*),event_dates(event_date,parade_group),category:store_categories(slug,name_pt,name_en)')
     .eq('status', 'published')
@@ -84,8 +82,8 @@ export async function fetchCatalog(): Promise<CatalogProduct[]> {
 }
 
 export async function fetchProduct(slug: string): Promise<CatalogProduct | null> {
-  if (!supabase) throw new Error('Supabase não configurado')
-  const { data, error } = await supabase
+  if (!api) throw new Error('Serviço indisponível')
+  const { data, error } = await api
     .from('store_products')
     .select('*,product_variants(*),event_dates(event_date,parade_group),category:store_categories(slug,name_pt,name_en)')
     .eq('slug', slug)
@@ -96,14 +94,14 @@ export async function fetchProduct(slug: string): Promise<CatalogProduct | null>
 }
 
 export async function fetchUser(): Promise<User | null> {
-  if (!supabase) return null
-  const { data, error } = await supabase.auth.getUser()
+  if (!api) return null
+  const { data, error } = await api.auth.getUser()
   if (error) return null
   return data.user
 }
 export async function fetchInstitution(): Promise<Institution> {
-  if (!supabase) return referenceInstitution
-  const { data, error } = await supabase.from('store_settings').select('value').eq('key','institutional').maybeSingle()
+  if (!api) return referenceInstitution
+  const { data, error } = await api.from('store_settings').select('value').eq('key','institutional').maybeSingle()
   if (error || !data || typeof data.value !== 'object') return referenceInstitution
   return { ...referenceInstitution, ...data.value } as Institution
 }

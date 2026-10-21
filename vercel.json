@@ -20,5 +20,8 @@
     { "source": "/comprar-receber", "destination": "/como-comprar", "permanent": true },
     { "source": "/retirada-ingressos", "destination": "/como-comprar", "permanent": true }
   ],
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/api/pagarme-webhook", "destination": "/api/backend?webhook=1" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
 }

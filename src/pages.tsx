@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { tr, useStore } from './storeContext'
-import { categories, money, supabase, type CatalogProduct, type ProductKind, referenceInstitution } from './store'
+import { categories, money, api, type CatalogProduct, type ProductKind, referenceInstitution } from './store'
 import { track } from './analytics'
 import { getAttribution } from './attribution'
 import { ParadeHomeSection } from './ParadeExperience'
@@ -48,11 +48,11 @@ export function Home() {
   const [faqs, setFaqs] = useState<{ id: string; question_pt: string; answer_pt: string }[]>([])
   const [eventDates, setEventDates] = useState<{ id: string; event_date: string; parade_group: string }[]>([])
   useEffect(() => {
-    if (!supabase) return
-    void supabase.from('store_banners').select('id,title_pt,title_en,image_url,target_url').eq('status','published').order('sort_order').then(({ data }) => setBanners(data ?? []))
-    void supabase.from('home_blocks').select('block_key,visible,sort_order').then(({ data }) => setBlocks(data ?? []))
-    void supabase.from('store_faqs').select('id,question_pt,answer_pt').eq('status','published').order('sort_order').limit(4).then(({ data }) => setFaqs(data ?? []))
-    void supabase.from('event_dates').select('id,event_date,parade_group').eq('status','published').order('event_date').then(({ data }) => setEventDates(data ?? []))
+    if (!api) return
+    void api.from('store_banners').select('id,title_pt,title_en,image_url,target_url').eq('status','published').order('sort_order').then(({ data }) => setBanners((data ?? []) as Parameters<typeof setBanners>[0]))
+    void api.from('home_blocks').select('block_key,visible,sort_order').then(({ data }) => setBlocks((data ?? []) as Parameters<typeof setBlocks>[0]))
+    void api.from('store_faqs').select('id,question_pt,answer_pt').eq('status','published').order('sort_order').limit(4).then(({ data }) => setFaqs((data ?? []) as Parameters<typeof setFaqs>[0]))
+    void api.from('event_dates').select('id,event_date,parade_group').eq('status','published').order('event_date').then(({ data }) => setEventDates((data ?? []) as Parameters<typeof setEventDates>[0]))
   }, [])
   const curated = products.filter((product) => product.featured).slice(0, 6)
   const featured = curated.length ? curated : [
@@ -95,7 +95,7 @@ export function Catalog({ kind, title, categorySlug }: { kind?: ProductKind; tit
   const { products, loading, error, language } = useStore()
   const [params, setParams] = useSearchParams()
   const [categoryOptions, setCategoryOptions] = useState<{ id: string; name_pt: string; name_en: string | null }[]>([])
-  useEffect(() => { if (supabase) void supabase.from('store_categories').select('id,name_pt,name_en').eq('status','published').order('sort_order').then(({ data }) => setCategoryOptions(data ?? [])) }, [])
+  useEffect(() => { if (api) void api.from('store_categories').select('id,name_pt,name_en').eq('status','published').order('sort_order').then(({ data }) => setCategoryOptions((data ?? []) as Parameters<typeof setCategoryOptions>[0])) }, [])
   const search = params.get('busca') ?? ''
   const dates = params.getAll('data')
   const selectedCategories = params.getAll('categoria')
@@ -162,10 +162,10 @@ export function ProductPage() {
   const variant = product?.product_variants.find((item) => item.id === variantId) ?? product?.product_variants[0]
   useEffect(() => { setVariantId(product?.product_variants[0]?.id ?? ''); setQuantity(1); setSourceChoice(''); setTransferDate('') }, [product])
   useEffect(() => {
-    if (product?.kind !== 'transfer' || !supabase) return
+    if (product?.kind !== 'transfer' || !api) return
     let active = true
-    void supabase.from('event_dates').select('event_date,parade_group').eq('status', 'published').order('event_date').then(({ data }) => {
-      if (active) setTransferDates(data ?? [])
+    void api.from('event_dates').select('event_date,parade_group').eq('status', 'published').order('event_date').then(({ data }) => {
+      if (active) setTransferDates((data ?? []) as Parameters<typeof setTransferDates>[0])
     })
     return () => { active = false }
   }, [product?.kind])
@@ -204,9 +204,9 @@ function useCartQuote() {
   const [quote, setQuote] = useState<{ total_cents: number; items: { variant_id: string; name: string; quantity: number; unit_price_cents: number; line_total_cents: number }[] } | null>(null)
   const [error, setError] = useState<string | null>(null)
   useEffect(() => {
-    if (!cart.lines.length || !supabase) { setQuote(null); return }
+    if (!cart.lines.length || !api) { setQuote(null); return }
     let active = true
-    void supabase.rpc('quote_cart', { lines: cart.lines }).then(({ data, error: quoteError }) => {
+    void api.rpc('quote_cart', { lines: cart.lines }).then(({ data, error: quoteError }) => {
       if (!active) return
       if (quoteError) { setError('O preço ou a disponibilidade mudou. Revise o carrinho.'); setQuote(null) }
       else { setError(null); setQuote(data as typeof quote) }
@@ -231,11 +231,11 @@ export function CheckoutPage() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   useEffect(() => { if (cart.lines.length) track('begin_checkout') }, [cart.lines.length])
   useEffect(() => {
-    if (!supabase) return
+    if (!api) return
     let active = true
     void Promise.all([
-      supabase.from('store_settings').select('value').eq('key', 'commerce_enabled').maybeSingle(),
-      supabase.from('store_pages').select('version').eq('slug', 'termos-de-compra').eq('status', 'published').eq('approval_status', 'approved').maybeSingle(),
+      api.from('store_settings').select('value').eq('key', 'commerce_enabled').maybeSingle(),
+      api.from('store_pages').select('version').eq('slug', 'termos-de-compra').eq('status', 'published').eq('approval_status', 'approved').maybeSingle(),
     ]).then(([setting, terms]) => {
       if (!active) return
       setCommerceReady(setting.data?.value === true)
@@ -244,7 +244,7 @@ export function CheckoutPage() {
     return () => { active = false }
   }, [])
   const startPayment = async () => {
-    if (!supabase || !user || !quote || !termsVersion || !acceptedTerms || !commerceReady || selectionMissing || processing) return
+    if (!api || !user || !quote || !termsVersion || !acceptedTerms || !commerceReady || selectionMissing || processing) return
     setProcessing(true)
     setCheckoutError(null)
     try {
@@ -253,7 +253,7 @@ export function CheckoutPage() {
       const createdAt = stored?.fingerprint === cartFingerprint && stored.key && typeof stored.createdAt === 'number' && Date.now() - stored.createdAt < 31 * 60_000 ? stored.createdAt : Date.now()
       const key = createdAt === stored?.createdAt && stored?.key ? stored.key : crypto.randomUUID()
       sessionStorage.setItem('ticket-rio-checkout-request', JSON.stringify({ fingerprint: cartFingerprint, key, createdAt }))
-      const { data, error: paymentError } = await supabase.functions.invoke('pagarme-checkout', {
+      const { data, error: paymentError } = await api.functions.invoke('pagarme-checkout', {
         body: { lines: cart.lines, request_key: key, terms_version: termsVersion, attribution: getAttribution() },
       })
       if (paymentError || !isPagarmeCheckoutUrl(data?.checkout_url)) {
@@ -287,7 +287,7 @@ export function StaticPage({ slug, title }: { slug: string; title: string }) {
   const [loaded, setLoaded] = useState<{ slug: string; content: PageContent | null } | null>(null)
   const content = loaded?.slug === slug ? loaded.content : undefined
   const { language } = useStore()
-  useEffect(() => { if (supabase) void supabase.from('store_pages').select('title_pt,title_en,body_pt,body_en,approval_status,updated_at').eq('slug', slug).eq('status', 'published').maybeSingle().then(({ data }) => setLoaded({ slug, content: data ?? null })); else setLoaded({ slug, content: null }) }, [slug])
+  useEffect(() => { if (api) void api.from('store_pages').select('title_pt,title_en,body_pt,body_en,approval_status,updated_at').eq('slug', slug).eq('status', 'published').maybeSingle().then(({ data }) => setLoaded({ slug, content: data as unknown as PageContent | null })); else setLoaded({ slug, content: null }) }, [slug])
   const policy = legalPages.some(([pageSlug]) => pageSlug === slug)
   const body = language === 'en' && content?.body_en ? content.body_en : content?.body_pt ?? ''
   return <div className="page-container narrow-page"><div className="page-intro"><span className="section-kicker">TICKET RIO</span><h1>{language === 'en' && content?.title_en ? content.title_en : content?.title_pt ?? title}</h1>{policy && content?.approval_status === 'approved' && <p className="legal-updated">{tr('Atualizado em', 'Updated on', language)} {new Date(content.updated_at).toLocaleDateString(language === 'pt' ? 'pt-BR' : 'en-US')}</p>}</div>{content === undefined ? <p role="status">{tr('Carregando conteúdo…', 'Loading content…', language)}</p> : content?.approval_status === 'approved' ? policy ? <LegalBody text={body} /> : <div className="rich-copy">{body}</div> : slug !== 'sobre' && <div className="pending-notice"><strong>Conteúdo pendente de aprovação</strong><p>{policy ? 'O texto desta política será publicado após revisão e aprovação pela Ticket Rio.' : 'As informações desta página estão em preparação. Fale com nossa equipe para orientações atualizadas.'}</p></div>}
@@ -300,7 +300,7 @@ export function StaticPage({ slug, title }: { slug: string; title: string }) {
 export function FaqPage() {
   const [faqs, setFaqs] = useState<{ id: string; question_pt: string; answer_pt: string; question_en: string | null; answer_en: string | null }[]>([])
   const { language } = useStore()
-  useEffect(() => { if (supabase) void supabase.from('store_faqs').select('id,question_pt,answer_pt,question_en,answer_en').eq('status','published').order('sort_order').then(({ data }) => setFaqs(data ?? [])) }, [])
+  useEffect(() => { if (api) void api.from('store_faqs').select('id,question_pt,answer_pt,question_en,answer_en').eq('status','published').order('sort_order').then(({ data }) => setFaqs((data ?? []) as Parameters<typeof setFaqs>[0])) }, [])
   return <div className="page-container narrow-page"><div className="page-intro"><span className="section-kicker">AJUDA</span><h1>{tr('Perguntas frequentes', 'Frequently asked questions', language)}</h1></div>{faqs.length ? faqs.map((faq) => <details className="faq-item" key={faq.id}><summary>{language === 'en' && faq.question_en ? faq.question_en : faq.question_pt}</summary><p>{language === 'en' && faq.answer_en ? faq.answer_en : faq.answer_pt}</p></details>) : <Empty title="Perguntas em preparação" detail="Fale com a equipe para tirar suas dúvidas enquanto este conteúdo é validado." action={<Link to="/contato">Entre em contato</Link>} />}</div>
 }
 export function ContactPage() {
@@ -313,9 +313,9 @@ export function ContactPage() {
   const selectedProduct = products.find((item) => item.slug === product)
   const send = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!user || !supabase) return
+    if (!user || !api) return
     const form = new FormData(event.currentTarget)
-    const { error } = await supabase.from('inquiries').insert({ customer_id: user.id, name: String(form.get('name') ?? ''), email: user.email, phone: String(form.get('phone') ?? ''), message: message.trim(), product_id: selectedProduct?.id ?? null, ...getAttribution() })
+    const { error } = await api.from('inquiries').insert({ customer_id: user.id, name: String(form.get('name') ?? ''), email: user.email, phone: String(form.get('phone') ?? ''), message: message.trim(), product_id: selectedProduct?.id ?? null, ...getAttribution() })
     setStatus(error ? 'Não foi possível enviar agora. Tente novamente pelo e-mail.' : 'Consulta recebida. Nossa equipe poderá responder pelo e-mail da sua conta.')
     if (!error) setMessage('')
   }
@@ -329,26 +329,26 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'recover' | 'r
   const [busy, setBusy] = useState(false)
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase) { setMessage('Autenticação indisponível.'); return }
+    if (!api) { setMessage('Autenticação indisponível.'); return }
     const form = new FormData(event.currentTarget)
     const email = String(form.get('email') ?? '').trim()
     const password = String(form.get('password') ?? '')
     setBusy(true)
     try {
       if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { error } = await api.auth.signInWithPassword({ email, password })
         if (error) throw error
         navigate('/conta')
       } else if (mode === 'register') {
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/conta` } })
+        const { error } = await api.auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/conta` } })
         if (error) throw error
         setMessage('Confira seu e-mail para confirmar o cadastro, caso a confirmação esteja ativada.')
       } else if (mode === 'recover') {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/redefinir-senha` })
+        const { error } = await api.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/redefinir-senha` })
         if (error) throw error
         setMessage('Se a conta existir, você receberá instruções por e-mail.')
       } else {
-        const { error } = await supabase.auth.updateUser({ password })
+        const { error } = await api.auth.updateUser({ password })
         if (error) throw error
         setMessage('Senha atualizada. Você já pode acessar sua conta.')
       }
@@ -357,7 +357,7 @@ export function AuthPage({ mode }: { mode: 'login' | 'register' | 'recover' | 'r
   }
   if (user && mode === 'login') return <div className="page-container narrow-page"><p>Você já está conectado. <Link to="/conta">Ir para minha conta</Link></p></div>
   const title = { login: 'Entrar', register: 'Criar conta', recover: 'Recuperar senha', reset: 'Redefinir senha' }[mode]
-  return <div className="page-container auth-page"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>{title}</h1></div><form className="stack-form auth-card" onSubmit={submit}>{mode !== 'reset' && <label>E-mail<input name="email" type="email" autoComplete="email" required /></label>}{mode !== 'recover' && <label>{mode === 'reset' ? 'Nova senha' : 'Senha'}<input name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={8} required /></label>}<button className="button" type="submit" disabled={busy}>{busy ? 'Aguarde…' : title}</button>{message && <p role="status">{message}</p>}</form><div className="auth-links">{mode === 'login' ? <><Link to="/cadastro">Criar conta</Link><Link to="/recuperar-senha">Esqueci minha senha</Link></> : <Link to="/login">Voltar para login</Link>}</div></div>
+  return <div className="page-container auth-page"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>{title}</h1></div><form className="stack-form auth-card" onSubmit={submit}>{mode !== 'reset' && <label>E-mail<input name="email" type="email" autoComplete="email" required /></label>}{mode !== 'recover' && <label>{mode === 'reset' ? 'Nova senha' : 'Senha'}<input name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} minLength={12} required /></label>}<button className="button" type="submit" disabled={busy}>{busy ? 'Aguarde…' : title}</button>{message && <p role="status">{message}</p>}</form><div className="auth-links">{mode === 'login' ? <><Link to="/cadastro">Criar conta</Link><Link to="/recuperar-senha">Esqueci minha senha</Link></> : <Link to="/login">Voltar para login</Link>}</div></div>
 }
 
 export function AccountPage() {
@@ -366,18 +366,18 @@ export function AccountPage() {
   const [orders, setOrders] = useState<{ id: string; order_number: number; status: string; payment_status: string; delivery_status: string; total_cents: number; created_at: string }[]>([])
   const [message, setMessage] = useState('')
   useEffect(() => {
-    if (!user || !supabase) return
-    void supabase.from('customer_profiles').select('first_name,last_name,phone,country_code,document_type,document_number').eq('user_id', user.id).maybeSingle().then(({ data }) => setProfile(data ?? {}))
-    void supabase.from('orders').select('id,order_number,status,payment_status,delivery_status,total_cents,created_at').eq('customer_id', user.id).order('created_at', { ascending: false }).then(({ data }) => setOrders(data ?? []))
+    if (!user || !api) return
+    void api.from('customer_profiles').select('first_name,last_name,phone,country_code,document_type,document_number').eq('user_id', user.id).maybeSingle().then(({ data }) => setProfile(data ?? {}))
+    void api.from('orders').select('id,order_number,status,payment_status,delivery_status,total_cents,created_at').eq('customer_id', user.id).order('created_at', { ascending: false }).then(({ data }) => setOrders((data ?? []) as Parameters<typeof setOrders>[0]))
   }, [user])
   if (!user) return <div className="page-container narrow-page"><Empty title="Entre na sua conta" detail="Seus pedidos e dados ficam disponíveis após o login." action={<Link className="button" to="/login">Entrar</Link>} /></div>
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase) return
-    const { error } = await supabase.from('customer_profiles').upsert({ user_id: user.id, ...profile })
+    if (!api) return
+    const { error } = await api.from('customer_profiles').upsert({ user_id: user.id, ...profile })
     setMessage(error ? 'Não foi possível salvar.' : 'Dados atualizados.')
   }
-  return <div className="page-container"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>Minha conta</h1><p>{user.email}</p></div><div className="account-grid"><section className="account-card"><h2>Dados pessoais</h2><form className="stack-form" onSubmit={save}>{[['first_name','Nome'],['last_name','Sobrenome'],['phone','Telefone'],['country_code','País'],['document_type','Tipo de documento'],['document_number','Documento']].map(([key,label]) => <label key={key}>{label}<input value={profile[key] ?? ''} onChange={(event) => setProfile({ ...profile, [key]: event.target.value })} maxLength={120} /></label>)}<p className="form-hint">CPF é opcional para clientes estrangeiros. Informe apenas o documento necessário à sua reserva.</p><button className="button" type="submit">Salvar dados</button>{message && <p role="status">{message}</p>}</form></section><section className="account-card"><h2>Meus pedidos</h2>{orders.length ? <div className="order-list">{orders.map((order) => <Link to={`/pedidos/${order.id}`} key={order.id}><strong>Pedido #{order.order_number}</strong><span>{new Date(order.created_at).toLocaleDateString('pt-BR')} · {money(order.total_cents)}</span><small>{order.status} · {order.payment_status} · {order.delivery_status}</small></Link>)}</div> : <p>Você ainda não tem pedidos.</p>}<button className="text-button" type="button" onClick={() => void supabase?.auth.signOut()}>Sair da conta</button></section></div></div>
+  return <div className="page-container"><div className="page-intro"><span className="section-kicker">MINHA TICKET RIO</span><h1>Minha conta</h1><p>{user.email}</p></div><div className="account-grid"><section className="account-card"><h2>Dados pessoais</h2><form className="stack-form" onSubmit={save}>{[['first_name','Nome'],['last_name','Sobrenome'],['phone','Telefone'],['country_code','País'],['document_type','Tipo de documento'],['document_number','Documento']].map(([key,label]) => <label key={key}>{label}<input value={profile[key] ?? ''} onChange={(event) => setProfile({ ...profile, [key]: event.target.value })} maxLength={120} /></label>)}<p className="form-hint">CPF é opcional para clientes estrangeiros. Informe apenas o documento necessário à sua reserva.</p><button className="button" type="submit">Salvar dados</button>{message && <p role="status">{message}</p>}</form></section><section className="account-card"><h2>Meus pedidos</h2>{orders.length ? <div className="order-list">{orders.map((order) => <Link to={`/pedidos/${order.id}`} key={order.id}><strong>Pedido #{order.order_number}</strong><span>{new Date(order.created_at).toLocaleDateString('pt-BR')} · {money(order.total_cents)}</span><small>{order.status} · {order.payment_status} · {order.delivery_status}</small></Link>)}</div> : <p>Você ainda não tem pedidos.</p>}<button className="text-button" type="button" onClick={() => void api?.auth.signOut()}>Sair da conta</button></section></div></div>
 }
 export function OrderPage() {
   const { id } = useParams()
@@ -386,10 +386,10 @@ export function OrderPage() {
   const [deliveries, setDeliveries] = useState<{ order_item_id: string; status: string; supplier: string | null; recipient_email: string | null; available_at: string | null; instructions: string | null }[]>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
-    if (!user || !supabase) { setLoading(false); return }
+    if (!user || !api) { setLoading(false); return }
     let active = true
     const load = async () => {
-      const client = supabase
+      const client = api
       if (!client) return
       const { data } = await client.from('orders').select('order_number,status,payment_status,delivery_status,total_cents,created_at,pagarme_checkout_url,order_items(id,product_name,variant_name,quantity,unit_price_cents,attributes)').eq('id', id).eq('customer_id', user.id).maybeSingle()
       if (!active) return
@@ -397,7 +397,7 @@ export function OrderPage() {
       setOrder(current)
       if (current?.order_items.length) {
         const result = await client.from('deliveries').select('order_item_id,status,supplier,recipient_email,available_at,instructions').in('order_item_id', current.order_items.map((item) => item.id))
-        if (active) setDeliveries(result.data ?? [])
+        if (active) setDeliveries((result.data ?? []) as Parameters<typeof setDeliveries>[0])
       } else setDeliveries([])
       if (active) setLoading(false)
     }

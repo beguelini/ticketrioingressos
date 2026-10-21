@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router'
 import { getAttribution } from './attribution'
-import { supabase } from './store'
+import { api } from './store'
 import { useStore } from './storeContext'
 import './support.css'
 
@@ -38,8 +38,8 @@ export default function SupportChat({ onClose }: { onClose: () => void }) {
   const [loadingTopics, setLoadingTopics] = useState(true)
   useEffect(() => { localStorage.setItem(storageKey, JSON.stringify(saved)) }, [saved])
   useEffect(() => {
-    if (!supabase) { setLoadingTopics(false); setError(t('Atendimento indisponível agora.', 'Support is unavailable right now.')); return }
-    void supabase.from('support_topics').select('id,category_key,category_pt,category_en,title_pt,title_en,example_pt,example_en,sort_order').eq('active', true).order('sort_order').then(({ data, error: loadError }) => {
+    if (!api) { setLoadingTopics(false); setError(t('Atendimento indisponível agora.', 'Support is unavailable right now.')); return }
+    void api.from('support_topics').select('id,category_key,category_pt,category_en,title_pt,title_en,example_pt,example_en,sort_order').eq('active', true).order('sort_order').then(({ data, error: loadError }) => {
       setTopics((data ?? []) as Topic[])
       setLoadingTopics(false)
       if (loadError) setError(t('Não foi possível carregar os assuntos.', 'Could not load support topics.'))
@@ -52,8 +52,8 @@ export default function SupportChat({ onClose }: { onClose: () => void }) {
     return products.filter((product) => product.status === 'published' && (!allowed || allowed.includes(product.kind))).slice(0, 80)
   }, [products, topic])
   const refresh = useCallback(async (session: SavedChat) => {
-    if (!supabase || document.visibilityState === 'hidden') return
-    const { data, error: loadError } = await supabase.functions.invoke('support-visitor', { body: { action: 'thread', id: session.id, token: session.token } })
+    if (!api || document.visibilityState === 'hidden') return
+    const { data, error: loadError } = await api.functions.invoke('support-visitor', { body: { action: 'thread', id: session.id, token: session.token } })
     if (loadError || !data?.messages) { setError('Não foi possível carregar a conversa. Tente novamente.'); return }
     setMessages(data.messages as Message[])
     setStatus(String(data.status ?? 'waiting_staff'))
@@ -66,10 +66,10 @@ export default function SupportChat({ onClose }: { onClose: () => void }) {
   }, [step, active, refresh])
   const begin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase || !topic || busy) return
+    if (!api || !topic || busy) return
     setBusy(true); setError('')
     const message = draft.trim()
-    const { data, error: createError } = await supabase.functions.invoke('support-visitor', { body: {
+    const { data, error: createError } = await api.functions.invoke('support-visitor', { body: {
       action: 'start', topic_id: topic.id, product_id: productId || null, name: name.trim(), email: email.trim(),
       message, attribution: getAttribution(), website: String(new FormData(event.currentTarget).get('website') ?? ''),
     } })
@@ -81,9 +81,9 @@ export default function SupportChat({ onClose }: { onClose: () => void }) {
   }
   const send = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase || !active || busy || !draft.trim()) return
+    if (!api || !active || busy || !draft.trim()) return
     setBusy(true); setError('')
-    const { data, error: sendError } = await supabase.functions.invoke('support-visitor', { body: { action: 'send', id: active.id, token: active.token, message: draft.trim() } })
+    const { data, error: sendError } = await api.functions.invoke('support-visitor', { body: { action: 'send', id: active.id, token: active.token, message: draft.trim() } })
     setBusy(false)
     if (sendError || !data?.ok) { setError(t('Mensagem não enviada. Aguarde um momento e tente novamente.', 'Message not sent. Please try again shortly.')); return }
     setDraft(''); void refresh(active)

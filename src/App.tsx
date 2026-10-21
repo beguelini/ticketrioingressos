@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import './styles.css'
 import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router'
-import type { User } from '@supabase/supabase-js'
-import { fetchCatalog, fetchInstitution, fetchUser, referenceInstitution, supabase, type CatalogProduct, type Language } from './store'
+import type { User } from './client'
+import { fetchCatalog, fetchInstitution, fetchUser, referenceInstitution, api, type CatalogProduct, type Language } from './store'
 import { useCart } from './useCart'
 import { StoreContext, tr, useStore } from './storeContext'
 import { Home, Catalog, ProductPage, WhatsAppSalesPage, StaticPage, FaqPage, ContactPage, AccountPage, AuthPage, OrderPage } from './pages'
@@ -173,7 +173,7 @@ function App() {
     void fetchCatalog().then((items) => { if (active) setProducts(items) }).catch(() => { if (active) setError('Não foi possível carregar o catálogo agora.') }).finally(() => { if (active) setLoading(false) })
     void fetchUser().then((current) => { if (active) setUser(current) })
     void fetchInstitution().then((current) => { if (active) setInstitution(current) })
-    const listener = supabase?.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null))
+    const listener = api?.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null))
     return () => { active = false; listener?.data.subscription.unsubscribe() }
   }, [])
   const cart = useCart(user?.id ?? null)

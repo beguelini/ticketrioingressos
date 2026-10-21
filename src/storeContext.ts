@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { User } from '@supabase/supabase-js'
+import type { User } from './client'
 import type { CatalogProduct, Institution, Language } from './store'
 import type { useCart } from './useCart'
 

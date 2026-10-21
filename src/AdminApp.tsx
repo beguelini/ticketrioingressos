@@ -1,8 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import type { User } from '@supabase/supabase-js'
+import type { User } from './client'
 import { BrowserRouter } from 'react-router'
 import { AdminPage } from './admin'
-import { supabase } from './store'
+import { api } from './store'
 import './admin.css'
 
 export default function AdminApp() {
@@ -16,36 +16,36 @@ export default function AdminApp() {
     document.documentElement.lang = 'pt-BR'
     if (window.location.hash.includes('type=invite') || window.location.hash.includes('type=recovery')) setMode('password')
     let active = true
-    void supabase?.auth.getUser().then(({ data }) => { if (active) { setUser(data.user); setReady(true) } })
-    const listener = supabase?.auth.onAuthStateChange((event, session) => {
+    void api?.auth.getUser().then(({ data }) => { if (active) { setUser(data.user); setReady(true) } })
+    const listener = api?.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       if (event === 'PASSWORD_RECOVERY' || window.location.hash.includes('type=invite')) setMode('password')
     })
-    if (!supabase) setReady(true)
+    if (!api) setReady(true)
     return () => { active = false; listener?.data.subscription.unsubscribe() }
   }, [])
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase || busy) return
+    if (!api || busy) return
     const data = new FormData(event.currentTarget)
     const email = String(data.get('email') ?? '').trim()
     const password = String(data.get('password') ?? '')
     setBusy(true); setMessage('')
     if (mode === 'recover') {
-      const result = await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/admin` })
+      const result = await api.auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/admin` })
       setMessage(result.error ? result.error.message : 'Se o e-mail estiver cadastrado, você receberá um link de recuperação.')
     } else if (mode === 'password') {
-      const result = await supabase.auth.updateUser({ password })
+      const result = await api.auth.updateUser({ password })
       setMessage(result.error ? result.error.message : 'Senha definida. Seu painel está pronto.')
       if (!result.error) { setMode('login'); window.history.replaceState(null, '', '/admin') }
     } else {
-      const result = await supabase.auth.signInWithPassword({ email, password })
+      const result = await api.auth.signInWithPassword({ email, password })
       if (result.error) setMessage('Não foi possível entrar. Confira o e-mail e a senha.')
     }
     setBusy(false)
   }
-  const signOut = () => { void supabase?.auth.signOut().then(() => { setUser(null); setMode('login') }) }
+  const signOut = () => { void api?.auth.signOut().then(() => { setUser(null); setMode('login') }) }
   if (!ready) return <div className="admin-loading">Verificando acesso…</div>
   if (user && mode !== 'password') return <BrowserRouter><AdminPage user={user} onSignOut={signOut} /></BrowserRouter>
-  return <div className="admin-auth"><div className="admin-auth-brand"><span>TR</span><strong>Ticket Rio</strong><small>PAINEL ADMINISTRATIVO</small></div><form onSubmit={(event) => void submit(event)}><h1>{mode === 'recover' ? 'Recuperar acesso' : mode === 'password' ? 'Defina sua senha' : 'Entre no painel'}</h1><p>{mode === 'login' ? 'Gerencie vendas, leads e campanhas em um só lugar.' : 'Use o e-mail da sua conta interna.'}</p>{mode !== 'password' && <label>E-mail<input type="email" name="email" autoComplete="email" required /></label>}{mode !== 'recover' && <label>Senha<input type="password" name="password" autoComplete={mode === 'password' ? 'new-password' : 'current-password'} minLength={8} required /></label>}{message && <p className="admin-message" role="status">{message}</p>}<button type="submit" disabled={busy}>{busy ? 'Aguarde…' : mode === 'recover' ? 'Enviar link' : mode === 'password' ? 'Salvar senha' : 'Entrar'}</button><button className="admin-link-button" type="button" onClick={() => { setMode(mode === 'login' ? 'recover' : 'login'); setMessage('') }}>{mode === 'login' ? 'Esqueci minha senha' : 'Voltar ao login'}</button></form><small>Ticket Rio · Acesso exclusivo da equipe</small></div>
+  return <div className="admin-auth"><div className="admin-auth-brand"><span>TR</span><strong>Ticket Rio</strong><small>PAINEL ADMINISTRATIVO</small></div><form onSubmit={(event) => void submit(event)}><h1>{mode === 'recover' ? 'Recuperar acesso' : mode === 'password' ? 'Defina sua senha' : 'Entre no painel'}</h1><p>{mode === 'login' ? 'Gerencie vendas, leads e campanhas em um só lugar.' : 'Use o e-mail da sua conta interna.'}</p>{mode !== 'password' && <label>E-mail<input type="email" name="email" autoComplete="email" required /></label>}{mode !== 'recover' && <label>Senha<input type="password" name="password" autoComplete={mode === 'password' ? 'new-password' : 'current-password'} minLength={12} required /></label>}{message && <p className="admin-message" role="status">{message}</p>}<button type="submit" disabled={busy}>{busy ? 'Aguarde…' : mode === 'recover' ? 'Enviar link' : mode === 'password' ? 'Salvar senha' : 'Entrar'}</button><button className="admin-link-button" type="button" onClick={() => { setMode(mode === 'login' ? 'recover' : 'login'); setMessage('') }}>{mode === 'login' ? 'Esqueci minha senha' : 'Voltar ao login'}</button></form><small>Ticket Rio · Acesso exclusivo da equipe</small></div>
 }
