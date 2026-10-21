@@ -1,12 +1,14 @@
 import {randomUUID,randomBytes} from 'node:crypto'
-import {writeFile} from 'node:fs/promises'
+import {open} from 'node:fs/promises'
 import {database} from '../server/mongo/db.mjs'
 import {passwordHash} from '../server/mongo/security.mjs'
 const output=process.argv[2]
 if(!output)throw new Error('Informe um arquivo privado para as credenciais.')
+const credentials=await open(output,'wx',0o600)
 const {db,client}=await database()
 const batch='training-2026-10',address='raulbeguelini29+treinamento@gmail.com'
 try {
+ if(!['ticketrio','ticketrio_preview'].includes(db.databaseName))throw new Error('Banco não autorizado para treinamento.')
  const now=new Date().toISOString()
  const products=await db.collection('store_products').find({status:'published'}).sort({sort_order:1}).toArray()
  if(!products.length)throw new Error('Catálogo vazio.')
@@ -39,6 +41,6 @@ try {
  let user=await db.collection('users').findOne({email:address}),password
  if(!user){password=randomBytes(24).toString('base64url');user={id:randomUUID(),email:address,password_hash:await passwordHash(password),email_confirmed_at:now,created_at:now};await db.collection('users').insertOne(user)}
  await db.collection('staff_roles').updateOne({user_id:user.id},{$set:{email:address,role:'administrator'},$setOnInsert:{id:randomUUID(),created_at:now}},{upsert:true})
- await writeFile(output,`Ticket Rio · acesso administrativo de treinamento\nURL: https://ticketrioingressos.com.br/admin?secao=sales\nE-mail: ${address}\n${password?`Senha: ${password}`:'A conta já existe. A senha anterior foi preservada.'}\n\nAlias do Gmail de raulbeguelini29@gmail.com. A conta principal foi preservada.\nEste acesso é administrador completo: compartilhe apenas com equipe autorizada.\n12 vendas marcadas TREINAMENTO, dados inteiramente fictícios, sem cobranças, mensagens ou estoque real.\n`,{mode:0o600,flag:'wx'})
+ await credentials.writeFile(`Ticket Rio · acesso administrativo de treinamento\nURL: https://ticketrioingressos.com.br/admin?secao=sales\nE-mail: ${address}\n${password?`Senha: ${password}`:'A conta já existe. A senha anterior foi preservada.'}\n\nAlias do Gmail de raulbeguelini29@gmail.com. A conta principal foi preservada.\nEste acesso é administrador completo: compartilhe apenas com equipe autorizada.\n12 vendas marcadas TREINAMENTO, dados inteiramente fictícios, sem cobranças, mensagens ou estoque real.\n`)
  console.log(JSON.stringify({created,total:await db.collection('orders').countDocuments({training_batch:batch}),credentials:'saved privately',database:db.databaseName}))
-}finally{await client.close()}
+}finally{await credentials.close();await client.close()}
