@@ -33,7 +33,14 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
   adminCookie=(await call({kind:'auth',action:'login',email:admin.email,password:'Teste-MongoDB-12345!'})).cookie
   customerCookie=(await call({kind:'auth',action:'login',email:customer.email,password:'Teste-MongoDB-12345!'})).cookie
  },60000)
- afterAll(async()=>{if(server)await new Promise((resolve)=>server.close(resolve));if(db&&db.databaseName===testDb&&/^ticketrio_test_[a-f0-9]+$/.test(testDb))await db.dropDatabase();await client?.close()})
+ afterAll(async()=>{
+  try {
+   if(server)await new Promise((resolve)=>server.close(resolve))
+   if(db&&db.databaseName===testDb&&/^ticketrio_test_[a-f0-9]+$/.test(testDb)) {
+    for(const {name} of await db.listCollections({},{nameOnly:true}).toArray())await db.collection(name).drop()
+   }
+  } finally {await client?.close()}
+ })
  it('uses HttpOnly sessions and returns only public identity',async()=>{
   const result=await call({kind:'auth',action:'login',email:customer.email,password:'Teste-MongoDB-12345!'})
   expect(result.cookie).toBeTruthy();expect(result.body.data.user).toEqual({id:customer.id,email:customer.email,email_confirmed_at:customer.email_confirmed_at});expect(JSON.stringify(result.body)).not.toContain('password_hash')

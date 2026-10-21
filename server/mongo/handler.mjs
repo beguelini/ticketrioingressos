@@ -28,7 +28,7 @@ export async function handler(req,res) {
     if(typeof input==='string') {try{input=JSON.parse(input)}catch{fail('invalid_json')}}
     if(!input||typeof input!=='object'||Array.isArray(input))fail('invalid_input')
     if(url.searchParams.get('webhook')==='1')input={kind:'webhook',body:input}
-    const baseUrl=process.env.SITE_URL||'https://ticketrioingressos.com.br'
+    const baseUrl=process.env.VERCEL_ENV==='preview'&&process.env.VERCEL_URL?`https://${process.env.VERCEL_URL}`:process.env.SITE_URL||'https://ticketrioingressos.com.br'
     if(input.kind!=='webhook'&&input.kind!=='cron') {
       const allowed=new Set([new URL(baseUrl).origin,...(process.env.ALLOWED_ORIGINS??'').split(',').filter(Boolean)])
       if(process.env.VERCEL_URL)allowed.add(`https://${process.env.VERCEL_URL}`)

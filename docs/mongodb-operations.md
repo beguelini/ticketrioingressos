@@ -75,3 +75,17 @@ Na verificação de 20/10/2026, o Atlas permitia apenas o IP local do operador. 
 O usuário de bootstrap fornecido tem `atlasAdmin` em todos os recursos. Antes de autorizar acesso externo, crie credenciais de aplicação separadas, com `readWrite` apenas no banco de cada ambiente, e substitua a URI do Preview e da futura produção.
 
 Uma opção para preservar a restrição por rede é usar Static IPs da Vercel e cadastrar somente os IPs apresentados por ela no Atlas. Como o build consulta o banco para o sitemap, habilite também **Use Static IPs for builds**. A documentação da Vercel informa US$ 100/mês por projeto, mais transferência e plano elegível; nenhuma contratação foi feita. Confira a condição atual em https://vercel.com/docs/networking/static-ips antes de contratar. A abertura global `0.0.0.0/0` não foi feita.
+
+## Integração nativa instalada
+
+Após o aceite do usuário, foi provisionado o recurso MongoDB Atlas nativo `ticketrio`, no plano Free, região São Paulo (`gru1`), vinculado ao projeto Vercel `ticketrioingressos`. A integração fornece `MONGODB_URI` aos três ambientes. Production usa `MONGODB_DB=ticketrio`; Preview/Development usam `ticketrio_preview`. O banco anterior foi preservado e recebeu backup antes da cópia.
+
+O fluxo nativo configura o acesso de rede e seu usuário de aplicação conforme o provedor: entrada `0.0.0.0/0`, autenticação SCRAM/TLS e função `readWriteAnyDatabase` para os bancos não sistêmicos do cluster nativo. Essa configuração foi informada ao usuário no aceite. Não foi contratado Static IPs. A URI administrativa do cluster anterior foi removida da branch Preview; o deploy usa a credencial provisionada pela integração. Não adicionar outros projetos ou dados de terceiros a esse cluster compartilhado entre os ambientes TicketRio.
+
+Para copiar uma instalação existente a outro cluster nativo vazio, com backup prévio e sem escritas concorrentes:
+
+```sh
+node scripts/migrate-native.mjs /CAMINHO/PRIVADO/origem.env /CAMINHO/PRIVADO/destino.env
+```
+
+O script exige hosts diferentes e destino vazio, preserva documentos e índices e não apaga a origem. Arquivos de configuração contêm segredos e ficam fora do Git. Em Preview, os links de autenticação usam o endereço do próprio deploy; Production usa `SITE_URL`.
