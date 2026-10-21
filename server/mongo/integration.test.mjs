@@ -17,7 +17,7 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
   return {status:response.status,cookie:response.headers.get('set-cookie')?.split(';')[0],body:await response.json()}
  }
  beforeAll(async()=>{
-  process.env.MONGODB_DB=testDb;process.env.SITE_URL='http://localhost:5173'
+  process.env.MONGODB_DB=testDb;process.env.SITE_URL='http://localhost:5173';process.env.VERCEL_BRANCH_URL='qa-branch.vercel.app'
   ;({db,client}=await database());await initialize(db)
   const hashed=await passwordHash('Teste-MongoDB-12345!')
   admin={id:randomUUID(),email:'admin@example.test',password_hash:hashed,email_confirmed_at:new Date().toISOString()}
@@ -40,6 +40,7 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
  })
  it('does not authenticate with an incorrect password',async()=>expect((await call({kind:'auth',action:'login',email:customer.email,password:'errada'})).status).toBe(401))
  it('does not accept cross-origin writes',async()=>expect((await call({kind:'query',table:'inquiries',operation:'insert'},adminCookie,'https://evil.example')).status).toBe(403))
+ it('allows the exact Vercel branch alias',async()=>expect((await call({kind:'query',table:'store_products'},null,'https://qa-branch.vercel.app')).status).toBe(200))
  it('only publishes approved catalog visibility',async()=>{const r=await call({kind:'query',table:'store_products'});expect(r.body.data.map((p)=>p.id)).toEqual(['published'])})
  it('allows admin access to drafts',async()=>expect((await call({kind:'query',table:'store_products'},adminCookie)).body.data).toHaveLength(2))
  it('isolates customer orders even when the client requests another owner',async()=>{const r=await call({kind:'query',table:'orders',filters:[{field:'customer_id',op:'eq',value:other.id}]},customerCookie);expect(r.body.data).toEqual([])})

@@ -14,7 +14,7 @@ Projeto Vercel: **ticketrioingressos**, repositório **beguelini/ticketrioingres
 | PAGARME_SECRET_KEY / PAGARME_ACCOUNT_ID | Somente após homologação | Credenciais de teste |
 | CRON_SECRET | Secret próprio do ambiente | Secret de homologação |
 
-`VERCEL_URL` permite a origem exata do próprio deploy. Outras origens só são aceitas quando cadastradas em `ALLOWED_ORIGINS`, separadas por vírgula; não usar `*`. As variáveis `VITE_*` são públicas e nunca recebem URI MongoDB, senha ou token.
+`VERCEL_URL` e `VERCEL_BRANCH_URL` permitem as origens exatas do próprio deploy e do alias da branch. Outras origens só são aceitas quando cadastradas em `ALLOWED_ORIGINS`, separadas por vírgula; não usar `*`. As variáveis `VITE_*` são públicas e nunca recebem URI MongoDB, senha ou token.
 
 No Atlas, autorize a rede de saída da hospedagem conforme seu plano. Não abra o cluster indiscriminadamente. Use usuários com acesso apenas ao banco do respectivo ambiente, TLS e uma política de backups do Atlas adequada à operação. As credenciais locais fornecidas pelo usuário serviram ao bootstrap; substitua por credenciais específicas de aplicação antes da produção.
 

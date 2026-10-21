@@ -32,6 +32,7 @@ export async function handler(req,res) {
     if(input.kind!=='webhook'&&input.kind!=='cron') {
       const allowed=new Set([new URL(baseUrl).origin,...(process.env.ALLOWED_ORIGINS??'').split(',').filter(Boolean)])
       if(process.env.VERCEL_URL)allowed.add(`https://${process.env.VERCEL_URL}`)
+      if(process.env.VERCEL_BRANCH_URL)allowed.add(`https://${process.env.VERCEL_BRANCH_URL}`)
       if(process.env.NODE_ENV!=='production') {allowed.add('http://localhost:5173');allowed.add('http://127.0.0.1:5173')}
       // Same-origin JSON requests only. No cross-origin credentials or permissive CORS.
       if(!allowed.has(req.headers.origin)||!String(req.headers['content-type']??'').startsWith('application/json'))fail('forbidden_origin',403)
