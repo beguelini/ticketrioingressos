@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import type { User } from '@supabase/supabase-js'
-import { supabase } from './store'
+import type { User } from './client'
+import { api } from './store'
 
 type Staff = { user_id: string; email: string | null; role: string; created_at: string }
 const roles = [
@@ -15,16 +15,16 @@ export default function Team({ user }: { user: User }) {
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
   const load = useCallback(async () => {
-    if (!supabase) return
-    const { data, error } = await supabase.from('staff_roles').select('user_id,email,role,created_at').order('created_at')
+    if (!api) return
+    const { data, error } = await api.from('staff_roles').select('user_id,email,role,created_at').order('created_at')
     setStaff((data ?? []) as Staff[])
     if (error) setMessage(`Não foi possível carregar a equipe: ${error.message}`)
   }, [])
   useEffect(() => { void load() }, [load])
   const act = async (body: Record<string,string>) => {
-    if (!supabase) return
+    if (!api) return
     setBusy(true); setMessage('')
-    const { data, error } = await supabase.functions.invoke('manage-staff', { body })
+    const { data, error } = await api.functions.invoke('manage-staff', { body })
     setBusy(false)
     if (error || !data?.ok) { setMessage(`Não foi possível concluir: ${data?.detail ?? data?.error ?? error?.message ?? 'erro desconhecido'}`); return }
     setMessage(body.action === 'invite' ? data.invited ? 'Convite enviado. O usuário definirá a senha pelo e-mail.' : 'Acesso atribuído ao usuário existente.' : 'Acesso atualizado.')

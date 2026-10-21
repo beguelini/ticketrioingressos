@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useState, type FormEvent } from 'react'
-import type { User } from '@supabase/supabase-js'
+import type { User } from './client'
 import { useSearchParams } from 'react-router'
-import { money, supabase } from './store'
+import { money, api } from './store'
 import { validateImport } from './csv'
 const CRM = lazy(() => import('./adminCRM'))
 const Media = lazy(() => import('./adminMedia'))
@@ -125,17 +125,17 @@ function AdminTable({ module }: { module: Module }) {
   const [importRows, setImportRows] = useState<Record<string, unknown>[]>([])
   const key = module.key ?? 'id'
   const load = useCallback(async () => {
-    if (!supabase) return
-    const query = supabase.from(module.table).select('*').limit(200)
+    if (!api) return
+    const query = api.from(module.table).select('*').limit(200)
     const { data, error } = await (module.table === 'store_settings' ? query.eq('key','institutional') : query)
     setRows((data ?? []) as Record<string, unknown>[])
     setMessage(error ? `Não foi possível carregar: ${error.message}` : '')
   }, [module.table])
   useEffect(() => { void load(); setEdit(null); setImportRows([]) }, [load])
-  useEffect(() => { if (module.table === 'store_products' && supabase) void supabase.from('store_categories').select('id,name_pt,status').order('sort_order').then(({ data }) => setCategoryChoices(data ?? [])) }, [module.table])
+  useEffect(() => { if (module.table === 'store_products' && api) void api.from('store_categories').select('id,name_pt,status').order('sort_order').then(({ data }) => setCategoryChoices((data ?? []) as Parameters<typeof setCategoryChoices>[0])) }, [module.table])
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (!supabase || !edit) return
+    if (!api || !edit) return
     let payload: Record<string, unknown>
     try {
       payload = Object.fromEntries(module.fields.filter(({ key: fieldKey }) => fieldKey in edit).map(({ key: fieldKey, kind }) => {
@@ -148,8 +148,8 @@ function AdminTable({ module }: { module: Module }) {
     } catch { setMessage('JSON inválido. Revise o campo antes de salvar.'); return }
     const currentId = edit[key]
     const result = currentId
-      ? await supabase.from(module.table).update(payload).eq(key, currentId)
-      : await supabase.from(module.table).insert(payload)
+      ? await api.from(module.table).update(payload).eq(key, currentId)
+      : await api.from(module.table).insert(payload)
     setMessage(result.error ? result.error.message : 'Registro salvo.')
     if (!result.error) { setEdit(null); void load() }
   }
@@ -169,19 +169,19 @@ function AdminTable({ module }: { module: Module }) {
     } catch (error) { setImportRows([]); setMessage(String(error)) }
   }
   const uploadImage = async (file: File) => {
-    if (!supabase) return
+    if (!api) return
     if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 10 * 1024 * 1024) { setMessage('Use JPG, PNG ou WebP de até 10 MB.'); return }
     const extension = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/png' ? 'png' : 'webp'
     const path = `products/${crypto.randomUUID()}.${extension}`
-    const { error } = await supabase.storage.from('ticket-rio-media').upload(path, file, { contentType: file.type, upsert: false })
+    const { error } = await api.storage.from('ticket-rio-media').upload(path, file, { contentType: file.type, upsert: false })
     if (error) { setMessage(`Upload falhou: ${error.message}`); return }
-    const { data } = supabase.storage.from('ticket-rio-media').getPublicUrl(path)
+    const { data } = api.storage.from('ticket-rio-media').getPublicUrl(path)
     setEdit((current) => current ? { ...current, image_url: data.publicUrl } : current)
     setMessage('Imagem enviada. Salve o produto para associá-la.')
   }
   const confirmImport = async () => {
-    if (!supabase || !importRows.length || !window.confirm(`Gravar ${importRows.length} registros como rascunho?`)) return
-    const { error } = await supabase.from(module.table).insert(importRows)
+    if (!api || !importRows.length || !window.confirm(`Gravar ${importRows.length} registros como rascunho?`)) return
+    const { error } = await api.from(module.table).insert(importRows)
     setMessage(error ? `Importação cancelada: ${error.message}` : 'Importação concluída. Revise os registros antes de publicar.')
     if (!error) { setImportRows([]); void load() }
   }
@@ -199,13 +199,13 @@ function AdminTable({ module }: { module: Module }) {
 function Dashboard() {
   const [counts, setCounts] = useState({ orders: 0, products: 0, inquiries: 0, pendingDeliveries: 0, approvedRevenue: 0, approvedOrders: 0 })
   useEffect(() => {
-    if (!supabase) return
+    if (!api) return
     void Promise.all([
-      supabase.from('orders').select('id', { count: 'exact', head: true }),
-      supabase.from('store_products').select('id', { count: 'exact', head: true }),
-      supabase.from('inquiries').select('id', { count: 'exact', head: true }),
-      supabase.from('deliveries').select('id', { count: 'exact', head: true }).neq('status','available_official_app'),
-      supabase.from('orders').select('total_cents').eq('payment_status','approved'),
+      api.from('orders').select('id', { count: 'exact', head: true }),
+      api.from('store_products').select('id', { count: 'exact', head: true }),
+      api.from('inquiries').select('id', { count: 'exact', head: true }),
+      api.from('deliveries').select('id', { count: 'exact', head: true }).neq('status','available_official_app'),
+      api.from('orders').select('total_cents').eq('payment_status','approved'),
     ]).then(([orders, products, inquiries, deliveries, revenue]) => setCounts({
       orders: orders.count ?? 0, products: products.count ?? 0, inquiries: inquiries.count ?? 0,
       pendingDeliveries: deliveries.count ?? 0,
@@ -222,8 +222,8 @@ export function AdminPage({ user, onSignOut }: { user: User; onSignOut: () => vo
   const [checked, setChecked] = useState(false)
   const [operationsOpen, setOperationsOpen] = useState(Boolean(params.get('modulo')))
   useEffect(() => {
-    if (!user || !supabase) { setChecked(true); setRole(null); return }
-    void supabase.from('staff_roles').select('role').eq('user_id', user.id).maybeSingle().then(({ data }) => { setRole(data?.role ?? null); setChecked(true) })
+    if (!user || !api) { setChecked(true); setRole(null); return }
+    void api.from('staff_roles').select('role').eq('user_id', user.id).maybeSingle().then(({ data }) => { setRole(data?.role ?? null); setChecked(true) })
   }, [user])
   if (!checked) return <div className="admin-loading">Verificando acesso…</div>
   if (!role) return <div className="admin-access"><h1>Acesso restrito</h1><p>Esta conta não possui função interna autorizada.</p><button onClick={onSignOut}>Sair</button></div>

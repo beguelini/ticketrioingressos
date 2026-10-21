@@ -1,0 +1,816 @@
+{
+  "store_products": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "sku",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "slug",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "name_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "name_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "kind",
+        "kind": "select",
+        "required": true,
+        "options": [
+          "ticket",
+          "transfer",
+          "tour",
+          "metro",
+          "apparel",
+          "package"
+        ]
+      },
+      {
+        "key": "category_id",
+        "kind": "category",
+        "required": false
+      },
+      {
+        "key": "event_date_id",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "summary_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "description_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "summary_en",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "description_en",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "image_url",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "gallery",
+        "kind": "json",
+        "required": false
+      },
+      {
+        "key": "video_url",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "included_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "excluded_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "instructions_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "attributes",
+        "kind": "json",
+        "required": false
+      },
+      {
+        "key": "seo_title_pt",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "seo_description_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published",
+          "archived"
+        ]
+      },
+      {
+        "key": "sales_mode",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "inquiry",
+          "online"
+        ]
+      },
+      {
+        "key": "featured",
+        "kind": "boolean",
+        "required": false
+      },
+      {
+        "key": "sort_order",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "promotion_label",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "promotion_color",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "blue",
+          "yellow",
+          "red"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "product_variants": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "product_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "sku",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "name_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "name_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "price_cents",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "compare_at_cents",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "currency",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "stock_total",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "available",
+        "kind": "boolean",
+        "required": false
+      },
+      {
+        "key": "min_quantity",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "max_quantity",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "attributes",
+        "kind": "json",
+        "required": false
+      }
+    ],
+    "readOnly": false
+  },
+  "store_categories": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "slug",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "name_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "name_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "description_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "image_url",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "sort_order",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published",
+          "archived"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "events": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "title_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "title_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "year",
+        "kind": "number",
+        "required": true
+      },
+      {
+        "key": "notes",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published",
+          "archived"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "event_dates": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "event_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "event_date",
+        "kind": "date",
+        "required": true
+      },
+      {
+        "key": "parade_group",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "starts_at",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published",
+          "archived"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "parade_schools": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "name",
+        "kind": "text",
+        "required": true
+      }
+    ],
+    "readOnly": false
+  },
+  "parade_lineup": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "event_date_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "school_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "parade_order",
+        "kind": "number",
+        "required": true
+      },
+      {
+        "key": "expected_at",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "notes",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "store_pages": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "slug",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "title_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "title_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "body_pt",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "body_en",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published"
+        ]
+      },
+      {
+        "key": "approval_status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "pending",
+          "approved"
+        ]
+      },
+      {
+        "key": "version",
+        "kind": "number",
+        "required": false
+      }
+    ],
+    "readOnly": false
+  },
+  "store_faqs": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "question_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "answer_pt",
+        "kind": "textarea",
+        "required": true
+      },
+      {
+        "key": "question_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "answer_en",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "sort_order",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "store_banners": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "title_pt",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "title_en",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "image_url",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "target_url",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "sort_order",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": false,
+        "options": [
+          "draft",
+          "published"
+        ]
+      }
+    ],
+    "readOnly": false
+  },
+  "home_blocks": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [
+      {
+        "key": "block_key",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "visible",
+        "kind": "boolean",
+        "required": false
+      },
+      {
+        "key": "sort_order",
+        "kind": "number",
+        "required": false
+      }
+    ],
+    "readOnly": false
+  },
+  "store_settings": {
+    "roles": [
+      "administrator"
+    ],
+    "fields": [
+      {
+        "key": "value",
+        "kind": "json",
+        "required": true
+      }
+    ],
+    "readOnly": false
+  },
+  "transfer_routes": {
+    "roles": [
+      "administrator",
+      "operations"
+    ],
+    "fields": [
+      {
+        "key": "product_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "service_date",
+        "kind": "date",
+        "required": true
+      },
+      {
+        "key": "sambadrome_side",
+        "kind": "select",
+        "required": true,
+        "options": [
+          "even",
+          "odd"
+        ]
+      },
+      {
+        "key": "capacity",
+        "kind": "number",
+        "required": false
+      },
+      {
+        "key": "instructions_outbound",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "instructions_return",
+        "kind": "textarea",
+        "required": false
+      },
+      {
+        "key": "details_due_before_checkout",
+        "kind": "boolean",
+        "required": false
+      }
+    ],
+    "readOnly": false
+  },
+  "transfer_stops": {
+    "roles": [
+      "administrator",
+      "operations"
+    ],
+    "fields": [
+      {
+        "key": "route_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "hotel_or_stop",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "pickup_at",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "sort_order",
+        "kind": "number",
+        "required": false
+      }
+    ],
+    "readOnly": false
+  },
+  "orders": {
+    "roles": [
+      "administrator",
+      "commercial",
+      "operations",
+      "finance"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "order_items": {
+    "roles": [
+      "administrator",
+      "commercial",
+      "operations",
+      "finance"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "payments": {
+    "roles": [
+      "administrator",
+      "finance"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "refunds": {
+    "roles": [
+      "administrator",
+      "finance"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "stock_reservations": {
+    "roles": [
+      "administrator",
+      "operations"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "deliveries": {
+    "roles": [
+      "administrator",
+      "operations"
+    ],
+    "fields": [
+      {
+        "key": "order_item_id",
+        "kind": "text",
+        "required": true
+      },
+      {
+        "key": "status",
+        "kind": "select",
+        "required": true,
+        "options": [
+          "awaiting_supplier",
+          "processing",
+          "available_official_app",
+          "missing_data",
+          "delivery_issue",
+          "cancelled"
+        ]
+      },
+      {
+        "key": "supplier",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "external_reference",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "recipient_email",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "available_at",
+        "kind": "text",
+        "required": false
+      },
+      {
+        "key": "instructions",
+        "kind": "textarea",
+        "required": false
+      }
+    ],
+    "readOnly": false
+  },
+  "transfer_passengers": {
+    "roles": [
+      "administrator",
+      "operations"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "inquiries": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "customer_profiles": {
+    "roles": [
+      "administrator",
+      "commercial"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "notification_attempts": {
+    "roles": [
+      "administrator",
+      "commercial",
+      "operations"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "audit_log": {
+    "roles": [
+      "administrator"
+    ],
+    "fields": [],
+    "readOnly": true
+  },
+  "staff_roles": {
+    "roles": [
+      "administrator"
+    ],
+    "fields": [],
+    "readOnly": true
+  }
+}

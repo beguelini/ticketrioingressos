@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import type { User } from '@supabase/supabase-js'
-import { supabase } from './store'
+import type { User } from './client'
+import { api } from './store'
 
 type Conversation = { id: string; topic_id: string; agent_key: string; queue_role: string; product_id: string | null; inquiry_id: string | null; customer_name: string; customer_email: string; status: string; assigned_to: string | null; created_at: string; last_message_at: string; last_customer_message_at: string; last_staff_read_at: string | null }
 type Topic = { id: string; category_pt: string; title_pt: string; agent_key: string; active: boolean }
@@ -25,15 +25,15 @@ export default function AdminSupport({ user }: { user: User }) {
   const [busy, setBusy] = useState(false)
   const [showAgents, setShowAgents] = useState(false)
   const loadList = useCallback(async (quiet = false) => {
-    if (!supabase) return
-    const { data, error: loadError } = await supabase.functions.invoke('support-staff', { body: { action: 'list' } })
+    if (!api) return
+    const { data, error: loadError } = await api.functions.invoke('support-staff', { body: { action: 'list' } })
     if (loadError || !data?.conversations) { if (!quiet) setError('Não foi possível carregar a fila. Tente atualizar.'); return }
     setList(data as ListData)
     if (!quiet) setError('')
   }, [])
   const loadThread = useCallback(async (id: string, quiet = false) => {
-    if (!supabase) return
-    const { data, error: loadError } = await supabase.functions.invoke('support-staff', { body: { action: 'thread', id } })
+    if (!api) return
+    const { data, error: loadError } = await api.functions.invoke('support-staff', { body: { action: 'thread', id } })
     if (loadError || !data?.messages) { if (!quiet) setError('Não foi possível carregar a conversa.'); return }
     setThread(data as Thread)
     if (!quiet) setError('')
@@ -45,9 +45,9 @@ export default function AdminSupport({ user }: { user: User }) {
   const agentName = (id: string) => list?.agents.find((item) => item.agent_key === id)?.name ?? id
   const memberName = (id: string | null) => id ? list?.members.find((item) => item.user_id === id)?.email ?? 'Atendente' : 'Não atribuído'
   const mutate = async (action: string, extra: Record<string, unknown>) => {
-    if (!supabase || !selected || busy) return
+    if (!api || !selected || busy) return
     setBusy(true); setError('')
-    const { data, error: writeError } = await supabase.functions.invoke('support-staff', { body: { action, id: selected, ...extra } })
+    const { data, error: writeError } = await api.functions.invoke('support-staff', { body: { action, id: selected, ...extra } })
     setBusy(false)
     if (writeError || !data?.ok) { setError('A alteração não foi salva. Confira a fila e tente novamente.'); return }
     await Promise.all([loadList(true), loadThread(selected, true)])
@@ -55,9 +55,9 @@ export default function AdminSupport({ user }: { user: User }) {
   const reply = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!draft.trim()) return
-    if (!supabase || !selected || busy) return
+    if (!api || !selected || busy) return
     setBusy(true); setError('')
-    const { data, error: writeError } = await supabase.functions.invoke('support-staff', { body: { action: 'reply', id: selected, message: draft.trim() } })
+    const { data, error: writeError } = await api.functions.invoke('support-staff', { body: { action: 'reply', id: selected, message: draft.trim() } })
     setBusy(false)
     if (writeError || !data?.ok) { setError('Resposta não enviada. Tente novamente.'); return }
     setDraft('')

@@ -6,5 +6,6 @@ import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
   { ignores: ['dist', 'node_modules'] },
+  { files: ['server/**/*.mjs', 'scripts/*.mjs', 'api/*.js'], extends: [js.configs.recommended], languageOptions: { globals: { ...globals.node } } },
   { files: ['**/*.{ts,tsx}'], extends: [js.configs.recommended, ...tseslint.configs.recommended], languageOptions: { globals: { ...globals.browser, ...globals.node } }, plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh }, rules: { ...reactHooks.configs.recommended.rules, 'react-refresh/only-export-components': ['warn', { allowConstantExport: true }] } },
 )

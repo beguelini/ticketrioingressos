@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
-import { supabase } from './store'
+import { api } from './store'
 import { useStore } from './storeContext'
 import './parade.css'
 
@@ -56,11 +56,11 @@ export function ParadePage() {
   const [error, setError] = useState(false)
 
   useEffect(() => {
-    if (!supabase) { setError(true); setLoading(false); return }
+    if (!api) { setError(true); setLoading(false); return }
     let active = true
     void Promise.all([
-      supabase.from('event_dates').select('id,event_date,parade_group,starts_at').eq('status', 'published').order('event_date'),
-      supabase.from('parade_lineup').select('id,event_date_id,parade_order,expected_at,parade_schools(name)').eq('status', 'published').order('parade_order'),
+      api.from('event_dates').select('id,event_date,parade_group,starts_at').eq('status', 'published').order('event_date'),
+      api.from('parade_lineup').select('id,event_date_id,parade_order,expected_at,parade_schools(name)').eq('status', 'published').order('parade_order'),
     ]).then(([datesResult, lineupResult]) => {
       if (!active) return
       if (datesResult.error || lineupResult.error) setError(true)

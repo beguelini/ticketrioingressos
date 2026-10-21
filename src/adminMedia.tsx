@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
-import type { User } from '@supabase/supabase-js'
-import { money, supabase } from './store'
+import type { User } from './client'
+import { money, api } from './store'
 
 type Row = { utm_source: string; utm_campaign: string; spend_cents: number; leads: number; approved_orders: number; revenue_cents: number }
 type Spend = { id: string; spend_date: string; utm_source: string; utm_campaign: string; amount_cents: number; notes: string | null }
@@ -18,10 +18,10 @@ export default function Media({ user }: { user: User }) {
   const [campaign, setCampaign] = useState('')
   const [landing, setLanding] = useState('/ingressos')
   const load = useCallback(async () => {
-    if (!supabase || !from || !to) return
+    if (!api || !from || !to) return
     const [report, entries] = await Promise.all([
-      supabase.rpc('media_performance', { from_date: from, to_date: to }),
-      supabase.from('media_spend_daily').select('id,spend_date,utm_source,utm_campaign,amount_cents,notes').gte('spend_date', from).lte('spend_date', to).order('spend_date', { ascending: false }).limit(200),
+      api.rpc('media_performance', { from_date: from, to_date: to }),
+      api.from('media_spend_daily').select('id,spend_date,utm_source,utm_campaign,amount_cents,notes').gte('spend_date', from).lte('spend_date', to).order('spend_date', { ascending: false }).limit(200),
     ])
     setRows((report.data ?? []) as Row[]); setSpend((entries.data ?? []) as Spend[])
     if (report.error || entries.error) setMessage(`Não foi possível carregar mídia: ${report.error?.message ?? entries.error?.message}`)
@@ -29,11 +29,11 @@ export default function Media({ user }: { user: User }) {
   useEffect(() => { void load() }, [load])
   const total = useMemo(() => rows.reduce((sum, row) => ({ spend: sum.spend + Number(row.spend_cents), leads: sum.leads + Number(row.leads), orders: sum.orders + Number(row.approved_orders), revenue: sum.revenue + Number(row.revenue_cents) }), { spend: 0, leads: 0, orders: 0, revenue: 0 }), [rows])
   const add = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); if (!supabase) return
+    event.preventDefault(); if (!api) return
     const form = new FormData(event.currentTarget)
     const amount = Math.round(Number(form.get('amount')) * 100)
     if (!Number.isSafeInteger(amount) || amount < 0) { setMessage('Informe um valor válido.'); return }
-    const { error } = await supabase.from('media_spend_daily').insert({
+    const { error } = await api.from('media_spend_daily').insert({
       spend_date: String(form.get('date')), utm_source: String(form.get('source')).trim().toLowerCase(),
       utm_campaign: String(form.get('campaign')).trim().toLowerCase(), amount_cents: amount,
       notes: String(form.get('notes') ?? '').trim() || null, created_by: user.id,
@@ -42,8 +42,8 @@ export default function Media({ user }: { user: User }) {
     if (!error) { event.currentTarget.reset(); void load() }
   }
   const remove = async (id: string) => {
-    if (!supabase || !window.confirm('Excluir este lançamento de investimento?')) return
-    const { error } = await supabase.from('media_spend_daily').delete().eq('id', id)
+    if (!api || !window.confirm('Excluir este lançamento de investimento?')) return
+    const { error } = await api.from('media_spend_daily').delete().eq('id', id)
     setMessage(error ? `Não foi possível excluir: ${error.message}` : 'Lançamento excluído.')
     if (!error) void load()
   }

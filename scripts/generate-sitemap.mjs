@@ -7,18 +7,14 @@ const paths = [
   '/como-comprar', '/perguntas-frequentes', '/politica-de-privacidade',
   '/politica-de-cookies', '/termos-de-uso', '/termos-de-compra', '/cancelamento-e-reembolso',
 ]
-const url = process.env.VITE_SUPABASE_URL
-const key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
-if (url && key) {
+if (process.env.MONGODB_URI) {
+  const { database } = await import('../server/mongo/db.mjs')
+  const { db, client } = await database()
   try {
-    const endpoint = new URL('/rest/v1/store_products', url)
-    endpoint.searchParams.set('select', 'slug')
-    endpoint.searchParams.set('status', 'eq.published')
-    const response = await fetch(endpoint, { headers: { apikey: key } })
-    if (!response.ok) throw new Error(`Supabase ${response.status}`)
-    const products = await response.json()
-    for (const product of products) if (typeof product.slug === 'string') paths.push(`/produto/${encodeURIComponent(product.slug)}`)
-  } catch (error) { console.warn('Sitemap: não foi possível carregar produtos publicados:', error) }
+    for (const product of await db.collection('store_products').find({ status: 'published' }, { projection: { slug: 1 } }).toArray()) {
+      if (typeof product.slug === 'string') paths.push(`/produto/${encodeURIComponent(product.slug)}`)
+    }
+  } finally { await client.close() }
 }
 const escapeXml = (value) => value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 const xml = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +

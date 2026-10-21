@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react'
-import type { User } from '@supabase/supabase-js'
-import { money, supabase } from './store'
+import type { User } from './client'
+import { money, api } from './store'
 
 type Lead = { id: string; name: string; email: string; phone: string | null; message: string; stage: string; assigned_to: string | null; next_followup_at: string | null; estimated_value_cents: number | null; utm_source: string | null; utm_campaign: string | null; created_at: string }
 type Activity = { id: string; actor_id: string; note: string; created_at: string }
@@ -19,33 +19,33 @@ export default function CRM({ user }: { user: User }) {
   const [note, setNote] = useState('')
   const [message, setMessage] = useState('')
   const load = useCallback(async () => {
-    if (!supabase) return
+    if (!api) return
     const [{ data, error }, staffResult] = await Promise.all([
-      supabase.from('inquiries').select('id,name,email,phone,message,stage,assigned_to,next_followup_at,estimated_value_cents,utm_source,utm_campaign,created_at').order('created_at', { ascending: false }).limit(300),
-      supabase.from('staff_roles').select('user_id,email,role').in('role', ['administrator','commercial']),
+      api.from('inquiries').select('id,name,email,phone,message,stage,assigned_to,next_followup_at,estimated_value_cents,utm_source,utm_campaign,created_at').order('created_at', { ascending: false }).limit(300),
+      api.from('staff_roles').select('user_id,email,role').in('role', ['administrator','commercial']),
     ])
     setLeads((data ?? []) as Lead[]); setStaff((staffResult.data ?? []) as Staff[])
     if (error) setMessage(`Não foi possível carregar os leads: ${error.message}`)
   }, [])
   useEffect(() => { void load() }, [load])
   useEffect(() => {
-    if (!selected || !supabase) return
-    void supabase.from('crm_activities').select('id,actor_id,note,created_at').eq('inquiry_id', selected).order('created_at', { ascending: false }).limit(100).then(({ data }) => setActivities((data ?? []) as Activity[]))
+    if (!selected || !api) return
+    void api.from('crm_activities').select('id,actor_id,note,created_at').eq('inquiry_id', selected).order('created_at', { ascending: false }).limit(100).then(({ data }) => setActivities((data ?? []) as Activity[]))
   }, [selected])
   const update = async (id: string, change: Partial<Lead>) => {
-    if (!supabase) return
-    const { error } = await supabase.from('inquiries').update({ ...change, updated_at: new Date().toISOString() }).eq('id', id)
+    if (!api) return
+    const { error } = await api.from('inquiries').update({ ...change, updated_at: new Date().toISOString() }).eq('id', id)
     setMessage(error ? `Não foi possível salvar: ${error.message}` : 'Lead atualizado.')
     if (!error) {
       void load()
-      const history = await supabase.from('crm_activities').select('id,actor_id,note,created_at').eq('inquiry_id', id).order('created_at', { ascending: false }).limit(100)
+      const history = await api.from('crm_activities').select('id,actor_id,note,created_at').eq('inquiry_id', id).order('created_at', { ascending: false }).limit(100)
       setActivities((history.data ?? []) as Activity[])
     }
   }
   const addLead = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); if (!supabase) return
+    event.preventDefault(); if (!api) return
     const form = new FormData(event.currentTarget)
-    const { error } = await supabase.from('inquiries').insert({
+    const { error } = await api.from('inquiries').insert({
       name: String(form.get('name') ?? '').trim(), email: String(form.get('email') ?? '').trim(),
       phone: String(form.get('phone') ?? '').trim(), message: String(form.get('message') ?? '').trim(),
       stage: 'new', assigned_to: user.id,
@@ -54,10 +54,10 @@ export default function CRM({ user }: { user: User }) {
     if (!error) { setCreating(false); void load() }
   }
   const addNote = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); if (!supabase || !selected || !note.trim()) return
-    const { error } = await supabase.from('crm_activities').insert({ inquiry_id: selected, actor_id: user.id, note: note.trim() })
+    event.preventDefault(); if (!api || !selected || !note.trim()) return
+    const { error } = await api.from('crm_activities').insert({ inquiry_id: selected, actor_id: user.id, note: note.trim() })
     setMessage(error ? `Não foi possível salvar a anotação: ${error.message}` : 'Anotação registrada.')
-    if (!error) { setNote(''); const { data } = await supabase.from('crm_activities').select('id,actor_id,note,created_at').eq('inquiry_id', selected).order('created_at', { ascending: false }).limit(100); setActivities((data ?? []) as Activity[]) }
+    if (!error) { setNote(''); const { data } = await api.from('crm_activities').select('id,actor_id,note,created_at').eq('inquiry_id', selected).order('created_at', { ascending: false }).limit(100); setActivities((data ?? []) as Activity[]) }
   }
   const visible = leads.filter((lead) => (filter === 'all' || lead.stage === filter) && (!query || `${lead.name} ${lead.email} ${lead.phone ?? ''} ${lead.utm_campaign ?? ''}`.toLowerCase().includes(query.toLowerCase())))
   const current = leads.find((lead) => lead.id === selected)

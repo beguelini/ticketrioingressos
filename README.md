@@ -1,85 +1,63 @@
 # Ticket Rio
 
-Loja Vite + React + TypeScript para a Ticket Rio, conectada ao Supabase. A interface pública, conta e painel usam o mesmo projeto, com autorização no PostgreSQL via RLS. A venda online fica bloqueada até a operação aprovar produtos, termos, estoque e um gateway.
+Loja e painel Vite + React + TypeScript, com API Node.js na Vercel e MongoDB Atlas. Nenhum serviço do Supabase é necessário.
 
-## Estado operacional
+## Desenvolvimento
 
-- Site público: home, famílias de produtos, filtros, detalhe, conteúdo institucional, contato, login e conta.
-- Catálogo novo: somente registros **publicados** de `store_products`; produtos e variantes são entidades separadas.
-- Registros de referência (camarotes, tours, transfers, metrô, camiseta e datas de 2027) foram criados como **rascunhos**, sem preços nem estoque fictícios.
-- Carrinho: persistência local, reconciliação com a conta e cotação em centavos pelo banco. O cliente não informa o preço à função de cotação.
-- Checkout: exibe a cotação e informa indisponibilidade de pagamento. **Não cria pedido, reserva, cobrança nem ingresso.**
-- Pedido, reserva de estoque, pagamentos, entregas, transfer, auditoria e notificação: esquema e políticas criados. `private.reserve_order` contém bloqueio transacional, idempotência por chave e validação de termos; não é exposta à API pública e permanece desativada por `commerce_enabled=false`. Um webhook real, expiração agendada e gateway não estão conectados.
-- Simulador de pagamento: contrato isolado em `server/paymentProvider.ts`, permitido somente em desenvolvimento local e sem transação financeira.
-- Chat do site: explicitamente simulado; atendimento real pelo e-mail/WhatsApp de referência, sujeito à confirmação da Ticket Rio.
-
-## Ambiente
-
-Instale Node.js compatível com Vite 8 e execute:
+Node.js 24 ou superior:
 
 ```sh
 npm ci
 cp .env.example .env.local
+# Preencha MONGODB_URI, MONGODB_DB e SITE_URL no arquivo local.
+npm run db:init
+npm run dev:api
+# Em outro terminal:
 npm run dev
 ```
 
-Preencha apenas `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` com valores públicos para o site. Variáveis `VITE_*` entram no JavaScript enviado ao navegador. A chave secreta ou `service_role` jamais deve ter esse prefixo.
+O Vite encaminha `/api` à API local na porta 3001. Use `SITE_URL=http://localhost:5173` localmente. Credenciais nunca recebem prefixo `VITE_`. `.env.local` não é versionado.
 
-`npm run lint`, `npm run test:run` e `npm run build` verificam o projeto. O build gera `dist` e um sitemap com produtos publicados no momento do build. Após publicar novos produtos, faça novo deploy para atualizá-lo.
+## Primeiro administrador
 
-## Supabase
-
-Execute as migrations de `supabase/migrations` na ordem. A primeira migration antiga contém produtos de demonstração; `commerce_foundation` os retira da leitura pública e `remove_legacy_mock_catalog` elimina a tabela antiga após a publicação da nova interface. Em instalações novas, todas devem ser aplicadas juntas antes de expor o site.
-
-Configure no Supabase Auth:
-
-- URL principal: domínio da loja.
-- URLs de redirecionamento: `/conta` e `/redefinir-senha` dos domínios de produção e Preview usados.
-- Confirmação de e-mail e templates de autenticação conforme a operação.
-
-As políticas permitem leitura anônima somente de conteúdo publicado. Perfis e pedidos são isolados por `auth.uid()`. Papéis internos residem em `staff_roles` e não podem ser atribuídos pelo próprio usuário comum. Os buckets `ticket-rio-media` (imagens públicas) e `ticket-rio-documents` (documentos privados) têm restrição de MIME e tamanho; uploads de imagens no painel usam o primeiro.
-
-### Primeiro administrador
-
-1. Crie uma conta pelo cadastro normal e confirme o e-mail.
-2. No SQL Editor do **projeto Ticket Rio** do Supabase, confira o UUID pelo e-mail:
-
-```sql
-select id, email, email_confirmed_at from auth.users where email = 'ADMIN_EMAIL';
+```sh
+npm run db:admin -- EMAIL_DO_ADMIN /CAMINHO/PRIVADO/primeiro-acesso.txt
 ```
 
-3. Após confirmar a identidade, execute:
+O comando cria a conta e a função administrativa no servidor e grava um link de uso único, válido por uma hora, com permissão de arquivo 0600. Defina `ADMIN_SETUP_URL` como o endereço do Preview ou desenvolvimento que usará esse banco. Abra o link para definir uma senha de pelo menos 12 caracteres. Não há senha padrão, cadastro público de administrador nem chave administrativa no navegador. Reexecute o comando se o link expirar; não publique esse arquivo em Git, PR ou logs.
 
-```sql
-insert into public.staff_roles(user_id, role)
-select id, 'administrator' from auth.users
-where email = 'ADMIN_EMAIL' and email_confirmed_at is not null;
+## Funcionalidades
+
+- Catálogo, categorias, variantes, estoque, páginas, políticas, banners, FAQ, blocos da home e desfiles editáveis no painel.
+- Sessões em cookies HttpOnly/SameSite, Secure em produção; senhas com scrypt e salt individual; tokens persistidos apenas como hash, expiração e uso único.
+- Cadastro com confirmação de e-mail, recuperação de senha, convite de equipe e revogação de sessões.
+- Papéis administrador, comercial, operação, financeiro e marketing conferidos no servidor a cada requisição. Clientes só acessam seus próprios perfis, carrinhos, pedidos e entregas.
+- CRM, histórico, investimento em mídia, relatório UTM e filas de atendimento humano por especialidade. Nenhuma IA responde automaticamente.
+- Imagens JPEG, PNG e WebP até 2 MB armazenadas no MongoDB, com validação de assinatura binária. Documentos privados não têm acesso público. O painel atual envia imagens; não há upload público de documentos.
+- Cotação com preços do servidor, reserva transacional de estoque, checkout Pagar.me e reconciliação de webhook consultando a API do provedor. Pagamento tardio após expiração exige revisão manual; o sistema não entrega ingresso automaticamente.
+
+A navegação atual direciona compras para WhatsApp. Esse fluxo foi preservado. A infraestrutura de checkout está disponível para homologação, mas `commerce_enabled=false` e produtos de referência são `inquiry`, com preço não informado, estoque zero e variantes indisponíveis. Não habilite vendas sem preços, termos e gateway revisados.
+
+## Banco e conteúdo inicial
+
+`npm run db:init` cria coleções e índices e importa os textos/assuntos e o catálogo de referência versionados. Os inserts são idempotentes e não sobrescrevem edições existentes. Imagens usam arquivos locais do projeto; não dependem do antigo Storage. Conteúdo importado continua sujeito à revisão operacional. Nenhum pedido, pagamento ou cliente fictício é criado.
+
+O inventário usa UUIDs de aplicação; `_id` fica interno. O contrato da API de consulta é fechado por coleção, campo, operação e papel. Não existe endpoint para executar MongoDB arbitrário. Campos de autenticação, funções da equipe e pagamentos não podem ser gravados pelo cliente genérico.
+
+## E-mail
+
+Configure `RESEND_API_KEY` e `EMAIL_FROM` de um domínio verificado da TicketRio. Sem essas duas configurações, cadastro, recuperação e convites por e-mail informam indisponibilidade; não simulam envio. O primeiro acesso pelo comando local funciona sem provedor de e-mail. Nenhuma senha ou token é exposto pela resposta de cadastro/recuperação.
+
+## Vercel e operação
+
+Veja [docs/mongodb-operations.md](docs/mongodb-operations.md) para ambientes, backup, restauração e checklist de publicação. Build: `npm run build`; saída: `dist`. A API é `api/backend.js` e deve ser entregue pela Vercel, nunca pelo servidor estático de Preview do Vite.
+
+```sh
+npm run lint
+npx tsc -b --pretty false
+npm run test:run
+TICKETRIO_INTEGRATION=1 npm run test:run
+npm run build
 ```
 
-Use o e-mail real do administrador no SQL Editor. Não coloque o UUID, a chave `service_role` ou uma rotina de criação de admin no frontend. O painel fica em `/admin`.
-
-## Conteúdo e importação
-
-Os módulos do painel permitem editar rascunhos de categorias, produtos, variantes, eventos, datas, escolas, desfiles, páginas, FAQ, banners, blocos da home e rotas de transfer. Administradores e operação podem registrar manualmente o status de entrega oficial, fornecedor, referência e instruções em pedidos existentes; o cliente vê esses dados na página do pedido. As alterações ficam no log de auditoria. Os módulos financeiros e as demais listas operacionais são somente leitura até existir um fluxo de pagamento conectado.
-
-Importação CSV de produtos: `sku,slug,name_pt,kind,summary_pt`. Importação CSV de variantes: `sku,product_id,name_pt,price_cents,currency`. O painel mostra prévia, valida colunas, SKU duplicado e exige confirmação. Não sobrescreve registros existentes. Produtos entram como rascunhos sob consulta; variantes entram com estoque zero e indisponíveis. Imagens podem ser enviadas ao Storage pelo editor de produtos.
-
-Páginas de privacidade, termos e cancelamento são rascunhos com aprovação pendente. A publicação definitiva exige revisão jurídica/comercial; o site público mostra aviso enquanto isso.
-
-## Publicação na Vercel
-
-O projeto usa `npm run build` e saída `dist`. Configure na Vercel da Ticket Rio as três variáveis públicas de `.env.example` necessárias à interface; `VITE_SITE_URL` serve ao sitemap. Nunca configure segredos como `VITE_*`.
-
-Fluxo: branch → PR → Preview → revisão → merge na `main` → Production automático. Confirme domínio, HTTP, rotas diretas, login, acesso negado ao painel para usuário comum e catálogo publicado. Redirecionamentos permanentes para URLs antigas ficam em `vercel.json`.
-
-## Pendências externas para venda real
-
-1. Escolher e contratar gateway (ASAAS, Mercado Pago, Pagar.me ou outro), homologar API e webhook autenticado, processar eventos duplicados/fora de ordem e reembolsos. `PAYMENT_*` são placeholders de servidor; a função de reserva **não** deve ser ativada antes disso.
-2. Definir regra operacional de expiração das reservas e agendar `private.release_expired_reservations()` com credenciais de servidor. Nenhum agendamento está ativo.
-3. Aprovar catálogo, preços, estoque, datas oficiais, entrega, fornecedores, produtos de camarote, conteúdo institucional e políticas. Os dados do site antigo são referências, não confirmação.
-4. Configurar e autenticar domínio no Resend; implementar gatilhos transacionais e deduplicação antes de enviar e-mails. `RESEND_*` não estão conectadas.
-5. Confirmar telefone e, para automação, credenciais/consentimento/templates da WhatsApp Business Platform. O site oferece apenas link de atendimento.
-6. Documentar a operação de entrega de ingressos oficiais (incluindo eventual Quentro). O site não gera QR Code, não trata comprovante como ingresso e não promete integração com fornecedor.
-7. Para SEO completo de produtos publicados após o deploy, atualizar o sitemap por novo build; páginas do SPA não possuem HTML pré-renderizado individualmente. GTM/Meta ficam aguardando IDs e consentimento aprovado.
-
-Não ative `store_settings.commerce_enabled` enquanto estes itens de pagamento e operação estiverem pendentes.
+Os testes de integração usam uma base temporária `ticketrio_test_UUID`, isolada dos dados reais e removida ao terminar. Não alteram o banco `ticketrio`. Configure a URI local com permissão de criar essa base de teste, ou use credencial de homologação.
