@@ -52,6 +52,7 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
   expect(await db.collection('customer_profiles').findOne({user_id:other.id})).toBe(null)
   expect((await db.collection('customer_profiles').findOne({user_id:customer.id})).first_name).toBe('Cliente')
  })
+ it('rejects object values in customer profile text fields',async()=>expect((await call({kind:'query',table:'customer_profiles',operation:'upsert',values:{user_id:customer.id,first_name:{value:'injected'}}},customerCookie)).status).toBe(400))
  it('enforces required fields and protects stock reservations',async()=>{
   expect((await call({kind:'query',table:'store_products',operation:'insert',values:{name_pt:'Incompleto'}},adminCookie)).status).toBe(400)
   expect((await call({kind:'query',table:'product_variants',operation:'update',values:{stock_reserved:999},filters:[{field:'id',op:'eq',value:'variant'}]},adminCookie)).status).toBe(400)

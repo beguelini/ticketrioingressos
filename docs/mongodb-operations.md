@@ -67,3 +67,11 @@ Antes de merge, confirmar:
 - Compra por WhatsApp preservada e pagamento online desativado até homologação.
 
 Para rollback de código, reverta o commit/PR ou restaure a versão anterior pela operação aprovada. Como a versão anterior dependia de um Supabase inexistente, ela restaura apenas a interface antiga, não um backend funcional. Preserve o MongoDB e seus backups.
+
+## Bloqueio de rede observado na preparação
+
+Na verificação de 20/10/2026, o Atlas permitia apenas o IP local do operador. A conexão local funcionou; o build Vercel falhou ao gerar o sitemap com `ERR_SSL_TLSV1_ALERT_INTERNAL_ERROR`. O Preview não está funcional até autorizar a rede da hospedagem.
+
+O usuário de bootstrap fornecido tem `atlasAdmin` em todos os recursos. Antes de autorizar acesso externo, crie credenciais de aplicação separadas, com `readWrite` apenas no banco de cada ambiente, e substitua a URI do Preview e da futura produção.
+
+Uma opção para preservar a restrição por rede é usar Static IPs da Vercel e cadastrar somente os IPs apresentados por ela no Atlas. Como o build consulta o banco para o sitemap, habilite também **Use Static IPs for builds**. A documentação da Vercel informa US$ 100/mês por projeto, mais transferência e plano elegível; nenhuma contratação foi feita. Confira a condição atual em https://vercel.com/docs/networking/static-ips antes de contratar. A abertura global `0.0.0.0/0` não foi feita.
