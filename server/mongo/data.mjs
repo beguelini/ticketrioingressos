@@ -87,7 +87,7 @@ function validate(table,input,who,insert) {
   return row
 }
 const defaults={store_products:{status:'draft',sales_mode:'inquiry',gallery:[],attributes:{},featured:false,sort_order:0},product_variants:{currency:'BRL',stock_total:0,stock_reserved:0,available:false,min_quantity:1,max_quantity:20,attributes:{}},store_categories:{status:'draft',sort_order:0},store_pages:{status:'draft',approval_status:'pending',version:1},events:{status:'draft'},event_dates:{status:'draft'},parade_lineup:{status:'draft'},store_faqs:{status:'draft',sort_order:0},store_banners:{status:'draft',sort_order:0}}
-async function joins(db,table,row,select) {
+async function joins(db,table,row,select,who) {
   const result=clean(row)
   if(table==='store_products') {
     if(select.includes('product_variants(')) result.product_variants=(await db.collection('product_variants').find({product_id:row.id}).toArray()).map(clean)
@@ -96,6 +96,16 @@ async function joins(db,table,row,select) {
   }
   if(table==='parade_lineup'&&select.includes('parade_schools(')) result.parade_schools=clean(await db.collection('parade_schools').findOne({id:row.school_id}))
   if(table==='orders'&&select.includes('order_items(')) result.order_items=(await db.collection('order_items').find({order_id:row.id}).toArray()).map(clean)
+  if(table==='orders'&&(select.includes('sale_details(')||select.includes('sale_customer('))) {
+    if(!['administrator','commercial','operations','finance'].includes(who.role)) fail('Acesso negado.',403)
+    const profile=row.customer_snapshot?null:await db.collection('customer_profiles').findOne({user_id:row.customer_id})
+    const account=row.customer_snapshot?null:await db.collection('users').findOne({id:row.customer_id})
+    result.customer=row.customer_snapshot ?? (profile?{...clean(profile),full_name:[profile.first_name,profile.last_name].filter(Boolean).join(' '),email:account?.email}: {email:account?.email})
+    if(select.includes('sale_details(')) {
+    result.payments=(await db.collection('payments').find({order_id:row.id}).toArray()).map(p=>({id:p.id,status:p.status,amount_cents:p.amount_cents,method:p.method,provider:p.provider,installments:p.installments,reference:p.reference,is_training:p.is_training}))
+    result.timeline=(await db.collection('order_events').find({order_id:row.id}).sort({created_at:1}).toArray()).map(e=>({id:e.id,note:e.note??e.event_type??e.type,created_at:e.created_at,actor:e.actor}))
+    }
+  }
   return result
 }
 export async function query(db,who,input) {
@@ -113,7 +123,7 @@ export async function query(db,who,input) {
     const count=input.count?await col.countDocuments(filter):null
     if(input.head) return {data:null,count,error:null}
     const rows=await col.find(filter).sort(sort).limit(limit).toArray()
-    const data=await Promise.all(rows.map((r)=>joins(db,table,r,String(input.select??'*'))))
+    const data=await Promise.all(rows.map((r)=>joins(db,table,r,String(input.select??'*'),who)))
     // Projection is applied after joining, so nested selection remains compatible with the UI.
     const selection=String(input.select??'*')
     const fields=selection.split(/,(?![^()]*\))/).map((f)=>f.trim())
