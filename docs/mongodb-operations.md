@@ -78,7 +78,7 @@ Uma opção para preservar a restrição por rede é usar Static IPs da Vercel e
 
 ## Integração nativa instalada
 
-Após o aceite do usuário, foi provisionado o recurso MongoDB Atlas nativo `ticketrio`, no plano Free, região São Paulo (`gru1`), vinculado ao projeto Vercel `ticketrioingressos`. A integração fornece `MONGODB_URI` aos três ambientes. Production usa `MONGODB_DB=ticketrio`; Preview/Development usam `ticketrio_preview`. O banco anterior foi preservado e recebeu backup antes da cópia.
+Após o aceite do usuário, foi provisionado o recurso MongoDB Atlas nativo `ticketrio`, no plano Free, região São Paulo (`gru1`), vinculado ao projeto Vercel `ticketrioingressos`. A função Vercel também usa `gru1`, evitando viagens de rede entre regiões. A integração fornece `MONGODB_URI` aos três ambientes. Production usa `MONGODB_DB=ticketrio`; Preview/Development usam `ticketrio_preview`. O banco anterior foi preservado e recebeu backup antes da cópia.
 
 O fluxo nativo configura o acesso de rede e seu usuário de aplicação conforme o provedor: entrada `0.0.0.0/0`, autenticação SCRAM/TLS e função `readWriteAnyDatabase` para os bancos não sistêmicos do cluster nativo. Essa configuração foi informada ao usuário no aceite. Não foi contratado Static IPs. A URI administrativa do cluster anterior foi removida da branch Preview; o deploy usa a credencial provisionada pela integração. Não adicionar outros projetos ou dados de terceiros a esse cluster compartilhado entre os ambientes TicketRio.
 
