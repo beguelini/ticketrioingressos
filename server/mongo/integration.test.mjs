@@ -21,8 +21,8 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
   process.env.MONGODB_DB=testDb;process.env.SITE_URL='http://localhost:5173';process.env.VERCEL_BRANCH_URL='qa-branch.vercel.app'
   ;({db,client}=await database());await initialize(db)
   const hashed=await passwordHash('Teste-MongoDB-12345!')
-  admin={id:randomUUID(),email:'admin@example.test',password_hash:hashed,email_confirmed_at:new Date().toISOString()}
-  customer={...admin,id:randomUUID(),email:'customer@example.test'};other={...admin,id:randomUUID(),email:'other@example.test'}
+  admin={id:randomUUID(),email:'admin@example.test',username:'admin',password_hash:hashed,email_confirmed_at:new Date().toISOString()}
+  customer={...admin,id:randomUUID(),email:'customer@example.test',username:undefined};other={...admin,id:randomUUID(),email:'other@example.test',username:undefined}
   await db.collection('users').insertMany([admin,customer,other])
   await db.collection('staff_roles').insertOne({id:randomUUID(),user_id:admin.id,email:admin.email,role:'administrator'})
   await db.collection('store_products').insertMany([{id:'published',sku:'PUBLIC',slug:'public',name_pt:'Publicado',status:'published',sales_mode:'online'},{id:'draft',sku:'DRAFT',slug:'draft',status:'draft'}])
@@ -45,6 +45,12 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
  it('uses HttpOnly sessions and returns only public identity',async()=>{
   const result=await call({kind:'auth',action:'login',email:customer.email,password:'Teste-MongoDB-12345!'})
   expect(result.cookie).toBeTruthy();expect(result.body.data.user).toEqual({id:customer.id,email:customer.email,email_confirmed_at:customer.email_confirmed_at});expect(JSON.stringify(result.body)).not.toContain('password_hash')
+ })
+ it('authenticates admin by username and authorizes the resulting session',async()=>{
+  const result=await call({kind:'auth',action:'login',email:'admin',password:'Teste-MongoDB-12345!'})
+  expect(result.status).toBe(200);expect(result.body.data.user.id).toBe(admin.id)
+  expect((await call({kind:'query',table:'staff_roles'},result.cookie)).status).toBe(200)
+  await call({kind:'auth',action:'logout'},result.cookie)
  })
  it('does not authenticate with an incorrect password',async()=>expect((await call({kind:'auth',action:'login',email:customer.email,password:'errada'})).status).toBe(401))
  it('does not accept cross-origin writes',async()=>expect((await call({kind:'query',table:'inquiries',operation:'insert'},adminCookie,'https://evil.example')).status).toBe(403))

@@ -26,6 +26,18 @@ npm run db:admin -- EMAIL_DO_ADMIN /CAMINHO/PRIVADO/primeiro-acesso.txt
 
 O comando cria a conta e a função administrativa no servidor e grava um link de uso único, válido por uma hora, com permissão de arquivo 0600. Defina `ADMIN_SETUP_URL` como o endereço do Preview ou desenvolvimento que usará esse banco. Abra o link para definir uma senha de pelo menos 12 caracteres. Não há senha padrão, cadastro público de administrador nem chave administrativa no navegador. Reexecute o comando se o link expirar; não publique esse arquivo em Git, PR ou logs.
 
+## Login administrativo `admin`
+
+O painel `/admin` aceita `admin` ou e-mail, sempre com senha. O alias `admin` só autentica uma conta confirmada, ativa e com função `administrator`; remover essa função bloqueia o alias. Cadastro público não atribui nomes de usuário.
+
+Para criar uma conta separada (sem alterar a conta principal), use um e-mail de recuperação controlado pela equipe e um arquivo privado fora do repositório:
+
+```sh
+node --env-file=/caminho/privado.env scripts/create-admin-login.mjs EMAIL_DA_EQUIPE /caminho/privado/acesso-admin.txt
+```
+
+O comando permite apenas `ticketrio` e `ticketrio_preview`, cria usuário e função em transação e grava uma senha aleatória em arquivo 0600. Se o e-mail ou o usuário `admin` já existir, aborta sem redefinir senhas. Não versione nem publique o arquivo de acesso. A recuperação continua usando o e-mail vinculado. Para rollback, remova o acesso em Equipe e acessos e reverta o PR.
+
 ## Funcionalidades
 
 - Catálogo, categorias, variantes, estoque, páginas, políticas, banners, FAQ, blocos da home e desfiles editáveis no painel.

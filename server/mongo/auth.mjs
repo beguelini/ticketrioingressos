@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { digest, email, fail, passwordHash, passwordMatches, publicUser, rateLimit, secret } from './security.mjs'
+import { digest, email, text, fail, passwordHash, passwordMatches, publicUser, rateLimit, secret } from './security.mjs'
 const cookieName = process.env.NODE_ENV === 'production' ? '__Host-ticketrio-session' : 'ticketrio-session'
 const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
 export const cookie = (value, age = 604800) => `${cookieName}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${age}${secure}`
@@ -37,12 +37,15 @@ export async function authAction(db,req,res,input,who,baseUrl) {
   if (action === 'user') return {user:publicUser(who.user)}
   if (action === 'logout') { if(who.session) await db.collection('sessions').deleteOne({_id:who.session._id});res.setHeader('Set-Cookie',cookie('',0));return {ok:true} }
   if (action === 'login') {
-    const address = email(input.email)
-    await rateLimit(db,`login:${address}`,10,900)
-    const user = await db.collection('users').findOne({email:address,disabled:{$ne:true}})
+    const login = text(input.email, 3, 254).toLowerCase()
+    const isAdminLogin = login === 'admin'
+    const user = await db.collection('users').findOne({...(isAdminLogin ? {username:'admin'} : {email:email(login)}),disabled:{$ne:true}})
+    // Both identifiers share the same account-level attempt limit.
+    await rateLimit(db,`login:${user?.email ?? login}`,10,900)
+    const staff = isAdminLogin && user ? await db.collection('staff_roles').findOne({user_id:user.id,role:'administrator'}) : null
     // Perform the same expensive operation for unknown users.
     const valid = await passwordMatches(input.password,user?.password_hash ?? `${'00'.repeat(16)}:${'00'.repeat(64)}`)
-    if (!valid || !user?.email_confirmed_at) fail('Confira o e-mail, a senha e a confirmação da conta.',401)
+    if (!valid || !user?.email_confirmed_at || (isAdminLogin && !staff)) fail('Confira o usuário ou e-mail, a senha e a confirmação da conta.',401)
     await issueSession(db,res,user);return {user:publicUser(user)}
   }
   if (action === 'register') {
