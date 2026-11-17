@@ -48,7 +48,11 @@ O comando permite apenas `ticketrio` e `ticketrio_preview`, cria usuário e fun�
 - Imagens JPEG, PNG e WebP até 2 MB armazenadas no MongoDB, com validação de assinatura binária. Documentos privados não têm acesso público. O painel atual envia imagens; não há upload público de documentos.
 - Cotação com preços do servidor, reserva transacional de estoque, checkout Pagar.me e reconciliação de webhook consultando a API do provedor. Pagamento tardio após expiração exige revisão manual; o sistema não entrega ingresso automaticamente.
 
-A navegação atual direciona compras para WhatsApp. Esse fluxo foi preservado. A infraestrutura de checkout está disponível para homologação, mas `commerce_enabled=false` e produtos de referência são `inquiry`, com preço não informado, estoque zero e variantes indisponíveis. Não habilite vendas sem preços, termos e gateway revisados.
+Carrinho e checkout estão disponíveis; os botões de compra respeitam `commerce_enabled`, preço positivo e estoque. Compradores podem concluir como visitantes, com nome e WhatsApp obrigatórios, em sessão HttpOnly separada de contas existentes. Atendimento e entrega são manuais via WhatsApp; e-mail não é necessário para comprar.
+
+O manifesto `data/inventory-carnaval-2027.json` reproduz o PDF aprovado (120 combinações, 417 vagas, datas corrigidas para 2027 e lotes repetidos somados). `scripts/import-carnaval-stock.mjs PASTA_PRIVADA` faz backup e importa uma única vez com vendas suspensas e sem reservas ativas. Recupera somente preços históricos existentes; itens sem preço ficam em rascunho. Nunca reimporte o lote após vendas. `scripts/link-carnaval-dates.mjs PASTA_PRIVADA` vincula as seis datas do PDF; `scripts/prepare-commerce-notices.mjs PASTA_PRIVADA` recupera os avisos anteriores adaptados à operação atual, sem sobrescrever avisos já aprovados.
+
+A ativação exige credenciais de produção, termos publicados, estoque importado e confirmação do novo webhook: `node --env-file=/caminho/privado.env scripts/activate-commerce.mjs --webhook-confirmed`. O script valida acesso à API da Pagar.me antes de liberar vendas. Sem essas condições, mantenha `commerce_enabled=false`.
 
 ## Banco e conteúdo inicial
 

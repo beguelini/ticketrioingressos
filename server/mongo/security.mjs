@@ -31,4 +31,4 @@ export function safeObject(value) {
   return value
 }
 export function clean(row) { if (!row) return null; const {_id, password_hash, token_hash, visitor_token_hash, ...result} = row; void _id; void password_hash; void token_hash; void visitor_token_hash; return result }
-export const publicUser = (row) => row ? {id:row.id,email:row.email,email_confirmed_at:row.email_confirmed_at ?? null} : null
+export const publicUser = (row) => row ? {id:row.id,email:row.email,email_confirmed_at:row.email_confirmed_at ?? null,...(row.is_guest?{is_guest:true}:{})} : null
