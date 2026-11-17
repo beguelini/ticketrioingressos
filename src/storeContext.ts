@@ -5,6 +5,7 @@ import type { useCart } from './useCart'
 
 export type StoreContextValue = {
   products: CatalogProduct[]
+  commerceEnabled: boolean
   loading: boolean
   error: string | null
   user: User | null

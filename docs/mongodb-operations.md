@@ -48,7 +48,7 @@ O script verifica hashes e contagens e recusa destino não vazio ou de mesmo nom
 
 ## Pagamento e expiração
 
-As rotas de compra atuais continuam levando ao atendimento por WhatsApp. Para ativar compra online, é necessário aprovar uma mudança específica de navegação, termos, estoque e preços, além de testar a API de checkout.
+As rotas de carrinho e checkout foram restauradas. Os botões de compra ficam bloqueados enquanto `commerce_enabled=false`; a ativação exige credenciais, webhook atual, termos e estoque conferidos. A entrega e o atendimento continuam via WhatsApp, com checkout de visitante sem envio de e-mail.
 
 O webhook Pagar.me usa `/api/pagarme-webhook`; o backend reconsulta o pedido no provedor, confere conta, moeda, montante, vínculo com pedido local e idempotência. Nenhuma aprovação depende do status enviado pelo navegador ou pelo webhook sem reconsulta. Credenciais faltantes mantêm a cobrança bloqueada.
 
