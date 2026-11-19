@@ -76,7 +76,7 @@ class Collection{
  async createIndex(keys,options={}){if(options.expireAfterSeconds!==undefined)return 'expiration_checked_at_read';const fields=Object.keys(keys);const expressions=fields.map(k=>`(${path(k)})`).join(',');const sql=`create ${options.unique?'unique ':''}index if not exists ${identifier(indexName(this.name,keys))} on ${this.table} (${expressions})${options.sparse?' where '+fields.map(k=>`${path(k)} is not null`).join(' and '):''}`;await this.db.sql.unsafe(sql);return indexName(this.name,keys)}
  async indexes(){return []}
 }
-export function openPostgres(url){return postgres(url,{ssl:{rejectUnauthorized:true,ca:readFileSync(new URL('./supabase-ca.crt',import.meta.url),'utf8')},max:4,prepare:false,idle_timeout:20,connect_timeout:20,onnotice:()=>{}})}
+export function openPostgres(url){return postgres(url,{ssl:{rejectUnauthorized:true,ca:readFileSync(new URL('./supabase-ca.crt',import.meta.url),'utf8')},max:2,prepare:false,idle_timeout:20,connect_timeout:20,onnotice:()=>{}})}
 export function createDatabase(sql,schema){
  identifier(schema)
  const db={kind:'supabase',databaseName:schema,sql,collection:name=>new Collection(db,name),createCollection:async name=>{if(!collections.includes(name))throw Error('unknown_collection');await sql.unsafe(`create table if not exists ${identifier(schema)}.${identifier(name)}(key_id text primary key,document jsonb not null check(jsonb_typeof(document)='object'));alter table ${identifier(schema)}.${identifier(name)} enable row level security`);return db.collection(name)},listCollections:()=>({toArray:async()=>{const rows=await sql.unsafe('select table_name as name from information_schema.tables where table_schema=$1',[schema]);return rows.filter(r=>collections.includes(r.name))}})}
