@@ -2,7 +2,8 @@
   "framework": "vite",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "regions": ["gru1"],
+  "regions": ["pdx1"],
+  "functions": { "api/backend.js": { "includeFiles": "server/postgres/supabase-ca.crt" } },
   "headers": [
     { "source": "/admin", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] },
     { "source": "/admin/:path*", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }

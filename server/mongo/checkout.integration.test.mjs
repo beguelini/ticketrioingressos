@@ -1,10 +1,11 @@
 import {beforeAll,beforeEach,afterAll,describe,it,expect,vi} from 'vitest'
 import {createServer} from 'node:http'
 import {randomUUID} from 'node:crypto'
-import {database,initialize} from './db.mjs'
+import {database,initialize} from '../database.mjs'
 import {handler} from './handler.mjs'
 const enabled=process.env.TICKETRIO_INTEGRATION==='1'
 if(enabled)process.loadEnvFile('.env.local')
+if(enabled&&process.env.DATA_BACKEND==='supabase')vi.setConfig({testTimeout:120000,hookTimeout:180000})
 describe.skipIf(!enabled)('Guest checkout and finite inventory',()=>{
   let db,client,server,base,orderId,providerCalls
   const testDb=`ticketrio_test_${randomUUID().replaceAll('-','').slice(0,16)}`
@@ -16,7 +17,7 @@ describe.skipIf(!enabled)('Guest checkout and finite inventory',()=>{
   }
   const checkout=(key=randomUUID(),quantity=1)=>({kind:'function',name:'pagarme-checkout',body:{request_key:key,terms_version:4,contact:{name:'Cliente Teste',phone:'(21) 99999-1234'},lines:[{variant_id:'v',quantity,unit_price_cents:1}]}})
   beforeAll(async()=>{
-    process.env.MONGODB_DB=testDb;process.env.SITE_URL='http://localhost:5173'
+    process.env.MONGODB_DB=testDb;if(process.env.DATA_BACKEND==='supabase')process.env.SUPABASE_DB_SCHEMA=testDb;process.env.SITE_URL='http://localhost:5173'
     process.env.PAGARME_SECRET_KEY='test-fixture-only';process.env.PAGARME_ACCOUNT_ID='acc_fixture'
     ;({db,client}=await database());await initialize(db)
     server=createServer(handler);await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}/api/backend`
@@ -27,10 +28,10 @@ describe.skipIf(!enabled)('Guest checkout and finite inventory',()=>{
         expect(payload.max_sessions).toBe(1);expect(payload.expires_at).toBeTruthy();expect(payload.payment_settings.credit_card_settings.installments).toHaveLength(10);expect(payload.payment_settings.credit_card_settings.installments.every(i=>i.total===10000)).toBe(true)
         return new Response(JSON.stringify({id:`pl_${orderId.replaceAll('-','')}`,url:`https://payment-link.pagar.me/pl_${orderId.replaceAll('-','')}`}))
       }
-      if(String(url).includes('/core/v5/orders/'))return new Response(JSON.stringify({id:'or_fixture',code:orderId,currency:'BRL',status:'paid',items:[{amount:10000,quantity:1}],charges:[{status:'paid',amount:10000}]}))
+      if(String(url).includes('/core/v5/orders/'))return new Response(JSON.stringify({id:'or_fixture',code:orderId,currency:'BRL',status:'paid',customer:{name:'Cliente Verificado',email:'pagador@example.test',document_type:'CPF',document:'00000000000'},items:[{amount:10000,quantity:1}],charges:[{id:'ch_fixture',status:'paid',payment_method:'pix',amount:10000}]}))
       throw Error('Unexpected external request')
     })
-  },60000)
+  },180000)
   beforeEach(async()=>{
     for(const name of ['users','sessions','orders','order_items','stock_reservations','product_variants','store_products','store_pages','store_settings','webhook_events','payments','deliveries'])await db.collection(name).deleteMany({})
     await db.collection('store_settings').insertOne({key:'commerce_enabled',value:true})
@@ -47,7 +48,7 @@ describe.skipIf(!enabled)('Guest checkout and finite inventory',()=>{
     finally{await client?.close()}
   })
   it('creates a guest with isolated HttpOnly session, WhatsApp and server-calculated price',async()=>{
-    const capabilities=await (await nativeFetch(`${base}?commerce-status=1`)).json();expect(capabilities.data).toEqual({checkout_version:1,provider_configured:true})
+    const capabilities=await (await nativeFetch(`${base}?commerce-status=1`)).json();expect(capabilities.data).toEqual({checkout_version:2,database_provider:db.kind??'mongodb',provider_configured:true})
     const r=await call(checkout());expect(r.status).toBe(200);expect(r.cookie).toBeTruthy()
     const order=await db.collection('orders').findOne({id:r.body.data.order_id})
     expect(order.total_cents).toBe(10000);expect(order.customer_snapshot.phone).toBe('21999991234')
@@ -79,6 +80,8 @@ describe.skipIf(!enabled)('Guest checkout and finite inventory',()=>{
     const v=await db.collection('product_variants').findOne({id:'v'});expect(v.stock_total).toBe(1);expect(v.stock_reserved).toBe(0)
     expect((await db.collection('orders').findOne({id:orderId})).payment_status).toBe('approved')
     expect(await db.collection('deliveries').countDocuments()).toBe(1)
+    expect((await db.collection('orders').findOne({id:orderId})).customer_snapshot).toMatchObject({full_name:'Cliente Verificado',email:'pagador@example.test',document_number:'00000000000'})
+    expect(await db.collection('payments').findOne({order_id:orderId})).toMatchObject({provider:'pagarme',method:'pix',reference:'ch_fixture'})
   })
   it('releases expired reservations on catalog refresh and holds late payments for manual review',async()=>{
     await call(checkout())

@@ -7,8 +7,8 @@ const paths = [
   '/como-comprar', '/perguntas-frequentes', '/politica-de-privacidade',
   '/politica-de-cookies', '/termos-de-uso', '/termos-de-compra', '/cancelamento-e-reembolso',
 ]
-if (process.env.MONGODB_URI) {
-  const { database } = await import('../server/mongo/db.mjs')
+if (process.env.DATA_BACKEND === 'supabase' || process.env.MONGODB_URI) {
+  const { database } = await import('../server/database.mjs')
   const { db, client } = await database()
   try {
     for (const product of await db.collection('store_products').find({ status: 'published' }, { projection: { slug: 1 } }).toArray()) {

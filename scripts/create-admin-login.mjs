@@ -1,6 +1,6 @@
 import { randomUUID, randomBytes } from 'node:crypto'
 import { open, unlink } from 'node:fs/promises'
-import { database } from '../server/mongo/db.mjs'
+import { database } from '../server/database.mjs'
 import { email, passwordHash } from '../server/mongo/security.mjs'
 
 const address = email(process.argv[2])

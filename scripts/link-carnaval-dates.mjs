@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto'
 import {mkdir,writeFile} from 'node:fs/promises'
 import {resolve,join} from 'node:path'
 import {BSON} from 'mongodb'
-import {database} from '../server/mongo/db.mjs'
+import {database} from '../server/database.mjs'
 import manifest from '../data/inventory-carnaval-2027.json' with {type:'json'}
 if(!process.argv[2])throw Error('Informe uma pasta privada nova para backup.')
 const output=resolve(process.argv[2])

@@ -1,6 +1,6 @@
 import {randomUUID,randomBytes} from 'node:crypto'
 import {open} from 'node:fs/promises'
-import {database} from '../server/mongo/db.mjs'
+import {database} from '../server/database.mjs'
 import {passwordHash} from '../server/mongo/security.mjs'
 const output=process.argv[2]
 if(!output)throw new Error('Informe um arquivo privado para as credenciais.')

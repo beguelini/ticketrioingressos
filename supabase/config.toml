@@ -1,0 +1,8 @@
+# Local CLI configuration. Private commerce schemas are never exposed through PostgREST.
+project_id = "ticketrioingressos"
+
+[api]
+schemas = ["public", "graphql_public"]
+
+[db]
+major_version = 17

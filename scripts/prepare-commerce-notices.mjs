@@ -1,7 +1,7 @@
 import {mkdir,writeFile} from 'node:fs/promises'
 import {resolve,join} from 'node:path'
 import {BSON} from 'mongodb'
-import {database} from '../server/mongo/db.mjs'
+import {database} from '../server/database.mjs'
 import notices from '../data/commerce-notices-restored.json' with {type:'json'}
 if(!process.argv[2])throw Error('Informe uma pasta privada nova para backup dos avisos.')
 const output=resolve(process.argv[2])

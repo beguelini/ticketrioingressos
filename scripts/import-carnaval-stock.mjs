@@ -2,7 +2,7 @@ import {randomUUID} from 'node:crypto'
 import {mkdir,writeFile} from 'node:fs/promises'
 import {join,resolve} from 'node:path'
 import {BSON} from 'mongodb'
-import {database} from '../server/mongo/db.mjs'
+import {database} from '../server/database.mjs'
 import manifest from '../data/inventory-carnaval-2027.json' with {type:'json'}
 
 const batch='inventory-carnaval-2027-20261117'

@@ -1,17 +1,17 @@
 import {randomUUID} from 'node:crypto'
-import {database} from '../server/mongo/db.mjs'
+import {database} from '../server/database.mjs'
 const confirmed=process.argv.includes('--webhook-confirmed')
 if(!confirmed)throw Error('Confirme primeiro o webhook na Pagar.me; execute com --webhook-confirmed somente após verificar a URL e os eventos.')
 if(!process.env.PAGARME_SECRET_KEY||!/^acc_[A-Za-z0-9]+$/.test(process.env.PAGARME_ACCOUNT_ID??''))throw Error('Cadastre PAGARME_SECRET_KEY e PAGARME_ACCOUNT_ID no servidor.')
 if(process.env.PAGARME_SECRET_KEY.includes('_test_'))throw Error('Não ative vendas com credencial de teste.')
 const runtime=await fetch(`${process.env.SITE_URL}/api/backend?commerce-status=1`,{signal:AbortSignal.timeout(12000)})
 const capabilities=runtime.ok?await runtime.json():null
-if(capabilities?.data?.checkout_version!==1||!capabilities.data.provider_configured)throw Error('Publique primeiro o checkout com as credenciais no runtime de produção.')
+if(capabilities?.data?.checkout_version!==2||!capabilities.data.provider_configured||capabilities.data.database_provider!=='supabase')throw Error('Publique primeiro o checkout com as credenciais no runtime de produção.')
 const response=await fetch('https://api.pagar.me/core/v5/paymentlinks?page=1&size=1',{headers:{Authorization:`Basic ${Buffer.from(`${process.env.PAGARME_SECRET_KEY}:`).toString('base64')}`},signal:AbortSignal.timeout(12000)})
 if(!response.ok)throw Error(`Pagar.me recusou a validação de acesso: HTTP ${response.status}.`)
 const {db,client}=await database()
 try {
-  if(db.databaseName!=='ticketrio'||process.env.SITE_URL!=='https://ticketrioingressos.com.br')throw Error('Ambiente de produção divergente.')
+  if(db.kind!=='supabase'||db.databaseName!=='ticketrio'||process.env.SITE_URL!=='https://ticketrioingressos.com.br')throw Error('Ambiente de produção divergente.')
   const session=client.startSession()
   try {await session.withTransaction(async()=>{
     const terms=await db.collection('store_pages').findOne({slug:'termos-de-compra',status:'published',approval_status:'approved',version:4},{session})

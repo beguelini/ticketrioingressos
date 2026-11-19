@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto'
 import {writeFile,chmod} from 'node:fs/promises'
 import {resolve} from 'node:path'
-import {database} from '../server/mongo/db.mjs'
+import {database} from '../server/database.mjs'
 import {email} from '../server/mongo/security.mjs'
 import {issueToken} from '../server/mongo/auth.mjs'
 const address=email(process.argv[2]??process.env.ADMIN_EMAIL)

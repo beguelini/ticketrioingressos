@@ -97,8 +97,12 @@ export async function webhook(db,client,event) {
     const late=status==='approved'&&reservations.length===0
     for(const r of reservations)await db.collection('product_variants').updateOne({id:r.variant_id},{$inc:{stock_reserved:-r.quantity,...(status==='approved'?{stock_total:-r.quantity}:{})}},{session})
     await db.collection('stock_reservations').updateMany({order_id:order.id,status:'reserved'},{$set:{status:status==='approved'?'consumed':'released'}},{session})
-    await db.collection('orders').updateOne({id:order.id},{$set:{payment_status:status,status:late?'payment_review':status==='approved'?'confirmed':status==='refunded'?'refunded':'cancelled',pagarme_order_id:providerId}},{session})
-    await db.collection('payments').updateOne({order_id:order.id},{$set:{provider_order_id:providerId,amount_cents:amount,status},$setOnInsert:{id:randomUUID(),created_at:new Date().toISOString()}},{upsert:true,session})
+    const customer=verified.customer??{},address=customer.address??charge?.last_transaction?.billing_address??{}
+    const optional=(v,max=240)=>typeof v==='string'&&v.trim()?v.trim().slice(0,max):undefined
+    const customerSnapshot={...order.customer_snapshot,...Object.fromEntries(Object.entries({full_name:optional(customer.name),email:optional(customer.email),document_type:optional(customer.document_type,20),document_number:optional(customer.document,40)}).filter(([,v])=>v!==undefined))}
+    if(address.line_1||address.zip_code)customerSnapshot.address=Object.fromEntries(Object.entries({street:optional(address.line_1),complement:optional(address.line_2),city:optional(address.city),state:optional(address.state,40),postal_code:optional(address.zip_code,30),country:optional(address.country,10)}).filter(([,v])=>v!==undefined))
+    await db.collection('orders').updateOne({id:order.id},{$set:{customer_snapshot:customerSnapshot,payment_status:status,status:late?'payment_review':status==='approved'?'confirmed':status==='refunded'?'refunded':'cancelled',pagarme_order_id:providerId}},{session})
+    await db.collection('payments').updateOne({order_id:order.id},{$set:{provider:'pagarme',reference:charge?.id??providerId,method:charge?.payment_method??'unknown',installments:charge?.last_transaction?.installments??1,provider_order_id:providerId,amount_cents:amount,status},$setOnInsert:{id:randomUUID(),created_at:new Date().toISOString()}},{upsert:true,session})
     if(status==='approved'&&!late) {
       const items=await db.collection('order_items').find({order_id:order.id},{session}).toArray()
       for(const item of items)await db.collection('deliveries').insertOne({id:randomUUID(),order_item_id:item.id,status:'awaiting_supplier',created_at:new Date().toISOString()},{session})

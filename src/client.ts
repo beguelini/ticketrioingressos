@@ -1,6 +1,6 @@
-// The browser only talks to the same-origin API. MongoDB credentials never enter this module.
+// The browser only talks to the same-origin API. Database credentials never enter this module.
 export type User = { id: string; email: string; email_confirmed_at?: string | null; is_guest?: boolean }
-// Database rows are dynamic because the shared admin editor supports multiple collections.
+// Database rows are dynamic because the shared admin editor supports multiple tables.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Row = Record<string, any>
 type Result = { data: (Row[] & Row) | null; error: { message: string } | null; count?: number | null }
