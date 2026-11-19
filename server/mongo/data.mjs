@@ -108,6 +108,19 @@ async function joins(db,table,row,select,who) {
   }
   return result
 }
+async function joinRows(db,table,rows,select,who){
+  if(table==='store_products'){
+    const ids=rows.map(r=>r.id)
+    const [variants,dates,categories]=await Promise.all([
+      select.includes('product_variants(')?db.collection('product_variants').find({product_id:{$in:ids}}).toArray():[],
+      select.includes('event_dates(')?db.collection('event_dates').find({id:{$in:rows.map(r=>r.event_date_id).filter(Boolean)}}).toArray():[],
+      select.includes('store_categories(')?db.collection('store_categories').find({id:{$in:rows.map(r=>r.category_id).filter(Boolean)}}).toArray():[]
+    ])
+    const byProduct=new Map();for(const variant of variants){const list=byProduct.get(variant.product_id)??[];list.push(clean(variant));byProduct.set(variant.product_id,list)}
+    return rows.map(row=>({...clean(row),...(select.includes('product_variants(')?{product_variants:byProduct.get(row.id)??[]}:{}) ,...(select.includes('event_dates(')?{event_dates:clean(dates.find(d=>d.id===row.event_date_id))}:{}),...(select.includes('store_categories(')?{category:clean(categories.find(c=>c.id===row.category_id))}:{})}))
+  }
+  return Promise.all(rows.map(row=>joins(db,table,row,select,who)))
+}
 export async function query(db,who,input) {
   const {table,operation='select'}=input
   if(!modules[table]&&!publicTables.has(table)&&!ownerFields[table]&&!extraRoles[table]) fail('unknown_table',404)
@@ -123,7 +136,7 @@ export async function query(db,who,input) {
     const count=input.count?await col.countDocuments(filter):null
     if(input.head) return {data:null,count,error:null}
     const rows=await col.find(filter).sort(sort).limit(limit).toArray()
-    const data=await Promise.all(rows.map((r)=>joins(db,table,r,String(input.select??'*'),who)))
+    const data=await joinRows(db,table,rows,String(input.select??'*'),who)
     // Projection is applied after joining, so nested selection remains compatible with the UI.
     const selection=String(input.select??'*')
     const fields=selection.split(/,(?![^()]*\))/).map((f)=>f.trim())

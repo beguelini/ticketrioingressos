@@ -1,7 +1,7 @@
-import {beforeAll,afterAll,describe,it,expect} from 'vitest'
+import {beforeAll,afterAll,describe,it,expect,vi} from 'vitest'
 import {createServer} from 'node:http'
 import {randomUUID} from 'node:crypto'
-import {database,initialize} from './db.mjs'
+import {database,initialize} from '../database.mjs'
 import {handler} from './handler.mjs'
 import {passwordHash,digest} from './security.mjs'
 import {issueToken} from './auth.mjs'
@@ -9,6 +9,7 @@ import {mediaReport} from './reports.mjs'
 import {quote,expire} from './commerce.mjs'
 const enabled=process.env.TICKETRIO_INTEGRATION==='1'
 if(enabled)process.loadEnvFile('.env.local')
+if(enabled&&process.env.DATA_BACKEND==='supabase')vi.setConfig({testTimeout:120000,hookTimeout:180000})
 describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
  let db,client,server,base,admin,customer,other,adminCookie,customerCookie
  const testDb=`ticketrio_test_${randomUUID().replaceAll('-','').slice(0,16)}`
@@ -18,7 +19,7 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
   return {status:response.status,cookie:response.headers.get('set-cookie')?.split(';')[0],body:await response.json()}
  }
  beforeAll(async()=>{
-  process.env.MONGODB_DB=testDb;process.env.SITE_URL='http://localhost:5173';process.env.VERCEL_BRANCH_URL='qa-branch.vercel.app'
+  process.env.MONGODB_DB=testDb;if(process.env.DATA_BACKEND==='supabase')process.env.SUPABASE_DB_SCHEMA=testDb;process.env.SITE_URL='http://localhost:5173';process.env.VERCEL_BRANCH_URL='qa-branch.vercel.app'
   ;({db,client}=await database());await initialize(db)
   const hashed=await passwordHash('Teste-MongoDB-12345!')
   admin={id:randomUUID(),email:'admin@example.test',username:'admin',password_hash:hashed,email_confirmed_at:new Date().toISOString()}
@@ -33,7 +34,7 @@ describe.skipIf(!enabled)('MongoDB isolated end-to-end API',()=>{
   server=createServer(handler);await new Promise((resolve)=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}/api/backend`
   adminCookie=(await call({kind:'auth',action:'login',email:admin.email,password:'Teste-MongoDB-12345!'})).cookie
   customerCookie=(await call({kind:'auth',action:'login',email:customer.email,password:'Teste-MongoDB-12345!'})).cookie
- },60000)
+ },180000)
  afterAll(async()=>{
   try {
    if(server)await new Promise((resolve)=>server.close(resolve))

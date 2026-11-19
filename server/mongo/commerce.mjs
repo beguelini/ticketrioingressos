@@ -1,5 +1,6 @@
 import {randomUUID} from 'node:crypto'
-import {fail} from './security.mjs'
+import {fail,text,rateLimit} from './security.mjs'
+import {issueSession} from './auth.mjs'
 export async function quote(db,lines,session) {
   if(!Array.isArray(lines)||!lines.length||lines.length>20)fail('invalid_cart')
   if(new Set(lines.map((l)=>l.variant_id)).size!==lines.length)fail('duplicate_variant')
@@ -32,21 +33,26 @@ export async function expire(db,client) {
     }
   })}finally{await session.endSession()}
 }
-export async function checkout(db,client,who,input,baseUrl) {
-  if(!who.user)fail('sign_in_required',401)
-  if(!process.env.PAGARME_SECRET_KEY)fail('checkout_unavailable',503)
+export async function checkout(db,client,who,input,baseUrl,req,res) {
+  if(!process.env.PAGARME_SECRET_KEY||!process.env.PAGARME_ACCOUNT_ID)fail('checkout_unavailable',503)
   if(typeof input.request_key!=='string'||!/^[0-9a-f-]{36}$/i.test(input.request_key))fail('invalid_request_key')
   const enabled=await db.collection('store_settings').findOne({key:'commerce_enabled'})
   if(enabled?.value!==true)fail('commerce_disabled',409)
+  const contact={full_name:text(input.contact?.name,3,120),phone:text(input.contact?.phone,10,25).replace(/\D/g,'')}
+  if(!/^\d{10,15}$/.test(contact.phone))fail('invalid_contact')
+  if(!who.user)await rateLimit(db,`guest-checkout:${req.headers['x-forwarded-for']?.split(',')[0]??req.socket?.remoteAddress??'unknown'}`,5,3600)
+  const guest=!who.user?{id:randomUUID(),email:`guest-${randomUUID()}@ticketrio.invalid`,is_guest:true,created_at:new Date().toISOString()}:null
+  const buyer=who.user??guest
   await expire(db,client)
   let order
   const session=client.startSession()
   try{await session.withTransaction(async()=>{
-    order=await db.collection('orders').findOne({customer_id:who.user.id,request_key:input.request_key},{session})
+    order=await db.collection('orders').findOne({customer_id:buyer.id,request_key:input.request_key},{session})
     if(order)return
     const terms=await db.collection('store_pages').findOne({slug:'termos-de-compra',status:'published',approval_status:'approved',version:input.terms_version},{session})
     if(!terms)fail('terms_not_accepted',409)
     const priced=await quote(db,input.lines,session)
+    if(guest)await db.collection('users').insertOne(guest,{session})
     const id=randomUUID(),now=new Date().toISOString(),expires=new Date(Date.now()+1800000).toISOString()
     for(const item of priced.items) {
       const saved=await db.collection('product_variants').updateOne({id:item.variant_id,available:true,price_cents:item.unit_price_cents,$expr:{$gte:[{$subtract:['$stock_total','$stock_reserved']},item.quantity]}},{$inc:{stock_reserved:item.quantity}},{session})
@@ -54,13 +60,14 @@ export async function checkout(db,client,who,input,baseUrl) {
       await db.collection('order_items').insertOne({id:randomUUID(),order_id:id,...item},{session})
       await db.collection('stock_reservations').insertOne({id:randomUUID(),order_id:id,variant_id:item.variant_id,quantity:item.quantity,status:'reserved',expires_at:expires},{session})
     }
-    order={id,customer_id:who.user.id,request_key:input.request_key,order_number:Date.now(),status:'pending_payment',payment_status:'pending',delivery_status:'awaiting_supplier',total_cents:priced.total_cents,currency:'BRL',terms_version:terms.version,created_at:now,expires_at:expires}
+    order={id,customer_id:buyer.id,customer_snapshot:contact,request_key:input.request_key,order_number:Date.now(),status:'pending_payment',payment_status:'pending',delivery_status:'awaiting_supplier',total_cents:priced.total_cents,currency:'BRL',terms_version:terms.version,created_at:now,expires_at:expires}
     await db.collection('orders').insertOne(order,{session})
   })}finally{await session.endSession()}
+  if(guest)await issueSession(db,res,guest)
   if(order.status!=='pending_payment'||order.expires_at<=new Date().toISOString())fail('order_unavailable',409)
   if(order.pagarme_checkout_url)return {order_id:order.id,checkout_url:order.pagarme_checkout_url}
   const items=await db.collection('order_items').find({order_id:order.id}).toArray()
-  const response=await fetch('https://api.pagar.me/core/v5/paymentlinks',{method:'POST',headers:{Authorization:`Basic ${Buffer.from(`${process.env.PAGARME_SECRET_KEY}:`).toString('base64')}`,'Content-Type':'application/json','Idempotency-Key':`ticket-rio-${order.id}`},body:JSON.stringify({type:'order',name:`Ticket Rio #${order.order_number}`,order_code:order.id,expires_in:30,max_paid_sessions:1,cart_settings:{items:items.map((i)=>({name:`${i.product_name} · ${i.variant_name}`.slice(0,180),amount:i.unit_price_cents,default_quantity:i.quantity}))},payment_settings:{accepted_payment_methods:['credit_card','pix'],credit_card_settings:{operation_type:'auth_and_capture',installments:[{number:1,total:order.total_cents}]},pix_settings:{expires_in:1800}},flow_settings:{success_url:`${baseUrl}/pedidos/${order.id}`}}),signal:AbortSignal.timeout(15000)})
+  const response=await fetch('https://api.pagar.me/core/v5/paymentlinks',{method:'POST',headers:{Authorization:`Basic ${Buffer.from(`${process.env.PAGARME_SECRET_KEY}:`).toString('base64')}`,'Content-Type':'application/json','Idempotency-Key':`ticket-rio-${order.id}`},body:JSON.stringify({type:'order',name:`Ticket Rio #${order.order_number}`,order_code:order.id,expires_at:order.expires_at,max_paid_sessions:1,max_sessions:1,cart_settings:{items:items.map((i)=>({name:`${i.product_name} · ${i.variant_name}`.slice(0,180),amount:i.unit_price_cents,default_quantity:i.quantity}))},payment_settings:{accepted_payment_methods:['credit_card','pix'],credit_card_settings:{operation_type:'auth_and_capture',installments:Array.from({length:Math.min(12,Math.max(1,Math.floor(order.total_cents/1000)))},(_,i)=>({number:i+1,total:order.total_cents}))},pix_settings:{expires_in:1800}},flow_settings:{success_url:`${baseUrl}/pedidos/${order.id}`}}),signal:AbortSignal.timeout(15000)})
   if(!response.ok)fail('provider_unavailable',503)
   const link=await response.json()
   if(typeof link.id!=='string'||!/^https:\/\/payment-link(?:-v3)?\.pagar\.me\/pl_[A-Za-z0-9]+$/.test(link.url??''))fail('invalid_checkout_url',503)
@@ -90,8 +97,12 @@ export async function webhook(db,client,event) {
     const late=status==='approved'&&reservations.length===0
     for(const r of reservations)await db.collection('product_variants').updateOne({id:r.variant_id},{$inc:{stock_reserved:-r.quantity,...(status==='approved'?{stock_total:-r.quantity}:{})}},{session})
     await db.collection('stock_reservations').updateMany({order_id:order.id,status:'reserved'},{$set:{status:status==='approved'?'consumed':'released'}},{session})
-    await db.collection('orders').updateOne({id:order.id},{$set:{payment_status:status,status:late?'payment_review':status==='approved'?'confirmed':status==='refunded'?'refunded':'cancelled',pagarme_order_id:providerId}},{session})
-    await db.collection('payments').updateOne({order_id:order.id},{$set:{provider_order_id:providerId,amount_cents:amount,status},$setOnInsert:{id:randomUUID(),created_at:new Date().toISOString()}},{upsert:true,session})
+    const customer=verified.customer??{},address=customer.address??charge?.last_transaction?.billing_address??{}
+    const optional=(v,max=240)=>typeof v==='string'&&v.trim()?v.trim().slice(0,max):undefined
+    const customerSnapshot={...order.customer_snapshot,...Object.fromEntries(Object.entries({full_name:optional(customer.name),email:optional(customer.email),document_type:optional(customer.document_type,20),document_number:optional(customer.document,40)}).filter(([,v])=>v!==undefined))}
+    if(address.line_1||address.zip_code)customerSnapshot.address=Object.fromEntries(Object.entries({street:optional(address.line_1),complement:optional(address.line_2),city:optional(address.city),state:optional(address.state,40),postal_code:optional(address.zip_code,30),country:optional(address.country,10)}).filter(([,v])=>v!==undefined))
+    await db.collection('orders').updateOne({id:order.id},{$set:{customer_snapshot:customerSnapshot,payment_status:status,status:late?'payment_review':status==='approved'?'confirmed':status==='refunded'?'refunded':'cancelled',pagarme_order_id:providerId}},{session})
+    await db.collection('payments').updateOne({order_id:order.id},{$set:{provider:'pagarme',reference:charge?.id??providerId,method:charge?.payment_method??'unknown',installments:charge?.last_transaction?.installments??1,provider_order_id:providerId,amount_cents:amount,status},$setOnInsert:{id:randomUUID(),created_at:new Date().toISOString()}},{upsert:true,session})
     if(status==='approved'&&!late) {
       const items=await db.collection('order_items').find({order_id:order.id},{session}).toArray()
       for(const item of items)await db.collection('deliveries').insertOne({id:randomUUID(),order_item_id:item.id,status:'awaiting_supplier',created_at:new Date().toISOString()},{session})

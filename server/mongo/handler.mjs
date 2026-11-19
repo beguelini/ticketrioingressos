@@ -1,4 +1,4 @@
-import {database} from './db.mjs'
+import {database} from '../database.mjs'
 import {authAction,identity} from './auth.mjs'
 import {query} from './data.mjs'
 import {visitor,staff} from './support.mjs'
@@ -14,13 +14,14 @@ export async function handler(req,res) {
     const url=new URL(req.url,'http://localhost')
     const {db,client}=await database()
     const who=await identity(db,req)
+    if(req.method==='GET'&&url.searchParams.has('commerce-status')) {send({data:{checkout_version:2,database_provider:db.kind??'mongodb',provider_configured:Boolean(process.env.PAGARME_SECRET_KEY&&process.env.PAGARME_ACCOUNT_ID)},error:null});return}
     if(req.method==='GET'&&url.searchParams.has('file')) {
       const bucket=url.searchParams.get('bucket'),path=url.searchParams.get('file')
       if(!['ticket-rio-media','ticket-rio-documents'].includes(bucket))fail('not_found',404)
       const file=await db.collection('files').findOne({bucket,path,...(bucket==='ticket-rio-documents'&&who.role!=='administrator'?{owner_id:who.user?.id??''}:{})})
       if(!file)fail('not_found',404)
       res.setHeader('Content-Type',file.mime);res.setHeader('Content-Security-Policy',"default-src 'none'; sandbox")
-      res.end(Buffer.from(file.bytes.buffer));return
+      res.end(file.bytes.base64?Buffer.from(file.bytes.base64,'base64'):Buffer.from(file.bytes.buffer));return
     }
     if(req.method!=='POST')fail('method_not_allowed',405)
     let input=req.body
@@ -42,12 +43,12 @@ export async function handler(req,res) {
     }
     let data
     if(input.kind==='auth')data=await authAction(db,req,res,input,who,baseUrl)
-    else if(input.kind==='query') {send(await query(db,who,input));return}
+    else if(input.kind==='query') {if(input.table==='store_products'&&(!input.operation||input.operation==='select'))await expire(db,client);send(await query(db,who,input));return}
     else if(input.kind==='upload')data=await upload(db,who,input)
     else if(input.kind==='function'&&input.name==='support-visitor')data=await visitor(db,req,input.body)
     else if(input.kind==='function'&&input.name==='support-staff')data=await staff(db,who,input.body)
     else if(input.kind==='function'&&input.name==='manage-staff')data=await manageStaff(db,client,who,input.body,baseUrl)
-    else if(input.kind==='function'&&input.name==='pagarme-checkout')data=await checkout(db,client,who,input.body,baseUrl)
+    else if(input.kind==='function'&&input.name==='pagarme-checkout')data=await checkout(db,client,who,input.body,baseUrl,req,res)
     else if(input.kind==='rpc'&&input.name==='quote_cart')data=await quote(db,input.body.lines)
     else if(input.kind==='rpc'&&input.name==='media_performance')data=await mediaReport(db,who,input.body)
     else if(input.kind==='webhook')data=await webhook(db,client,input.body)

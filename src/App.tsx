@@ -5,7 +5,7 @@ import type { User } from './client'
 import { fetchCatalog, fetchInstitution, fetchUser, referenceInstitution, api, type CatalogProduct, type Language } from './store'
 import { useCart } from './useCart'
 import { StoreContext, tr, useStore } from './storeContext'
-import { Home, Catalog, ProductPage, WhatsAppSalesPage, StaticPage, FaqPage, ContactPage, AccountPage, AuthPage, OrderPage } from './pages'
+import { Home, Catalog, ProductPage, CartPage, CheckoutPage, WhatsAppSalesPage, StaticPage, FaqPage, ContactPage, AccountPage, AuthPage, OrderPage } from './pages'
 import { ParadePage } from './ParadeExperience'
 import { startAnalytics, track } from './analytics'
 import { readConsent, saveConsent } from './consent'
@@ -152,9 +152,9 @@ function StoreRoutes() {
     <Route path="/redefinir-senha" element={<AuthPage mode="reset" />} />
     <Route path="/conta" element={<AccountPage />} />
     <Route path="/pedidos/:id" element={<OrderPage />} />
-    <Route path="/carrinho" element={<Navigate to="/atendimento-compra" replace />} />
+    <Route path="/carrinho" element={<CartPage />} />
     <Route path="/atendimento-compra" element={<WhatsAppSalesPage />} />
-    <Route path="/checkout" element={<Navigate to="/atendimento-compra" replace />} />
+    <Route path="/checkout" element={<CheckoutPage />} />
     {legacyRoutes.map(([from, to]) => <Route key={from} path={from} element={<Navigate to={to} replace />} />)}
     <Route path="*" element={<div className="page-container"><h1>Página não encontrada</h1><Link to="/">Voltar ao início</Link></div>} />
   </Routes></Shell>
@@ -163,6 +163,7 @@ function StoreRoutes() {
 function App() {
   const [products, setProducts] = useState<CatalogProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const [commerceEnabled, setCommerceEnabled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [user, setUser] = useState<User | null>(null)
   const [institution, setInstitution] = useState(referenceInstitution)
@@ -172,11 +173,12 @@ function App() {
     let active = true
     void fetchCatalog().then((items) => { if (active) setProducts(items) }).catch(() => { if (active) setError('Não foi possível carregar o catálogo agora.') }).finally(() => { if (active) setLoading(false) })
     void fetchUser().then((current) => { if (active) setUser(current) })
+    void api?.from('store_settings').select('value').eq('key', 'commerce_enabled').maybeSingle().then(({ data }) => { if (active) setCommerceEnabled(data?.value === true) })
     void fetchInstitution().then((current) => { if (active) setInstitution(current) })
     const listener = api?.auth.onAuthStateChange((_event, session) => setUser(session?.user ?? null))
     return () => { active = false; listener?.data.subscription.unsubscribe() }
   }, [])
   const cart = useCart(user?.id ?? null)
-  return <StoreContext.Provider value={{ products, loading, error, user, institution, language, setLanguage, cart }}><BrowserRouter><StoreRoutes /></BrowserRouter></StoreContext.Provider>
+  return <StoreContext.Provider value={{ products, loading, error, user, institution, language, setLanguage, cart, commerceEnabled }}><BrowserRouter><StoreRoutes /></BrowserRouter></StoreContext.Provider>
 }
 export default App
